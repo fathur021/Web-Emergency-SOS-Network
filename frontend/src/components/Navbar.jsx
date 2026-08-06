@@ -1,5 +1,5 @@
 import React from 'react';
-import { Siren, MapPin } from 'lucide-react';
+import { Siren, MapPin, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 const Navbar = ({ location = "Jl. Sudirman, No. 42" }) => {
   return (
@@ -22,6 +22,16 @@ const Navbar = ({ location = "Jl. Sudirman, No. 42" }) => {
         </span>
         <span className="text-slate-300 sm:hidden">GPS Aktif</span>
       </div>
+
+      {/* Link Masuk Sebagai Relawan */}
+      <Link
+        to="/volunteer"
+        className="flex items-center gap-2 px-3.5 py-1.5 bg-emerald-500/10 border border-emerald-500/40 text-emerald-400 rounded-full font-semibold text-xs hover:bg-emerald-500/20 transition"
+      >
+        <ShieldCheck className="w-4 h-4" />
+        <span className="hidden sm:inline">Masuk Relawan</span>
+        <span className="sm:hidden">Relawan</span>
+      </Link>
     </header>
   );
 };
