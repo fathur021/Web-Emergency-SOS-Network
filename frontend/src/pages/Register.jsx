@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Siren, User, Mail, Lock, ShieldCheck, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+
 const Register = () => {
+  const navigate = useNavigate();
+  const [isSuccess, setIsSuccess] = useState(false);
   const [formData, setFormData] = useState({
     nama: '',
     email: '',
@@ -21,13 +24,20 @@ const Register = () => {
     e.preventDefault();
     console.log('Register Data:', formData);
     // Nanti akan dihubungkan ke Endpoint API POST /auth/register
+
+    setIsSuccess(true);
+    setTimeout(() => {
+      navigate('/login');
+    }, 700);
   };
 
   return (
-    <div className="min-h-screen w-full bg-slate-950 font-sans text-slate-100 flex">
+    <div className="min-h-screen w-full bg-slate-950 font-sans text-slate-100 flex overflow-hidden">
       
       {/* SISI KIRI: BRANDING & KATA-KATA MOTIVASI (Hidden di Mobile, Visible di MD ke Atas) */}
-      <div className="hidden md:flex md:w-1/2 bg-slate-900 border-r border-slate-800 p-12 flex-col justify-between relative overflow-hidden">
+      <div className={`hidden md:flex md:w-1/2 bg-slate-900 border-r border-slate-800 p-12 flex-col justify-between relative overflow-hidden transition-all duration-700 ease-in-out z-10 ${
+        isSuccess ? '-translate-x-full opacity-0' : 'translate-x-0 opacity-100'
+      }`}>
         {/* Dekorasi Background Glow */}
         <div className="absolute top-1/4 -left-20 w-96 h-96 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -76,7 +86,9 @@ const Register = () => {
       </div>
 
       {/* SISI KANAN: FORM REGISTER */}
-      <div className="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-slate-950">
+      <div className={`w-full md:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-slate-950 transition-all duration-700 ease-in-out z-10 ${
+        isSuccess ? 'translate-x-full opacity-0' : 'translate-x-0 opacity-100'
+      }`}>
         <div className="w-full max-w-md space-y-8">
           
           {/* Header Mobile / Title */}
@@ -174,9 +186,10 @@ const Register = () => {
             {/* Tombol Submit */}
             <button
               type="submit"
-              className="w-full py-3 px-4 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-xl text-xs sm:text-sm shadow-lg shadow-red-600/20 flex items-center justify-center gap-2 transition"
+              disabled={isSuccess}
+              className="w-full py-3 px-4 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-xl text-xs sm:text-sm shadow-lg shadow-red-600/20 flex items-center justify-center gap-2 transition disabled:opacity-50"
             >
-              Daftar Sekarang <ArrowRight className="w-4 h-4" />
+              {isSuccess ? 'Memproses...' : 'Daftar Sekarang'} <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
@@ -187,7 +200,6 @@ const Register = () => {
               Masuk di sini
             </a>
           </div>
-
         </div>
       </div>
 
