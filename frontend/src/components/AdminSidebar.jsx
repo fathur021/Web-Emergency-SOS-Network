@@ -1,4 +1,5 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Users, 
@@ -36,15 +37,32 @@ const AdminSidebar = ({ isOpen, onClose }) => {
 
           {/* Navigasi Links */}
           <nav className="space-y-1">
-            <a href="#" className="flex items-center gap-3 px-3 py-2.5 bg-red-500/10 text-red-400 rounded-xl font-medium text-xs border border-red-500/30">
+            <NavLink
+              to="/admin"
+              end
+              onClick={onClose}
+              className={({ isActive }) => `flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition border ${
+                isActive
+                  ? 'bg-red-500/10 text-red-400 border-red-500/30'
+                  : 'text-slate-400 hover:bg-slate-800 border-transparent'
+              }`}
+            >
               <LayoutDashboard className="w-4 h-4" /> Live Dashboard
-            </a>
+            </NavLink>
             <a href="#" className="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:bg-slate-800 rounded-xl font-medium text-xs transition">
               <Users className="w-4 h-4" /> Kelola Pengguna
             </a>
-            <a href="#" className="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:bg-slate-800 rounded-xl font-medium text-xs transition">
+            <NavLink
+              to="/admin/relawan"
+              onClick={onClose}
+              className={({ isActive }) => `flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition border ${
+                isActive
+                  ? 'bg-red-500/10 text-red-400 border-red-500/30'
+                  : 'text-slate-400 hover:bg-slate-800 border-transparent'
+              }`}
+            >
               <ShieldCheck className="w-4 h-4" /> Kelola Relawan
-            </a>
+            </NavLink>
             <a href="#" className="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:bg-slate-800 rounded-xl font-medium text-xs transition">
               <History className="w-4 h-4" /> Riwayat Laporan
             </a>

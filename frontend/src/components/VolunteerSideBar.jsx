@@ -1,4 +1,5 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 import { ShieldCheck, Map, History, Settings, X } from 'lucide-react';
 
 const VolunteerSideBar = ({ isOpen, onClose }) => {
@@ -26,14 +27,31 @@ const VolunteerSideBar = ({ isOpen, onClose }) => {
 
           {/* Navigasi Links */}
           <nav className="space-y-1">
-            <a href="#" className="flex items-center gap-3 px-3 py-2.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl font-medium text-xs">
+            <NavLink
+              to="/volunteer"
+              end
+              onClick={onClose}
+              className={({ isActive }) => `flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition ${
+                isActive
+                  ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
+                  : 'text-slate-400 hover:bg-slate-800 border border-transparent'
+              }`}
+            >
               <Map className="w-4 h-4" />
               <span>Peta Radar SOS</span>
-            </a>
-            <a href="#" className="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:bg-slate-800 rounded-xl font-medium text-xs transition">
+            </NavLink>
+            <NavLink
+              to="/volunteer/riwayat"
+              onClick={onClose}
+              className={({ isActive }) => `flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition ${
+                isActive
+                  ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
+                  : 'text-slate-400 hover:bg-slate-800 border border-transparent'
+              }`}
+            >
               <History className="w-4 h-4" />
               <span>Riwayat Bantuan</span>
-            </a>
+            </NavLink>
             <a href="#" className="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:bg-slate-800 rounded-xl font-medium text-xs transition">
               <Settings className="w-4 h-4" />
               <span>Pengaturan Radius</span>
