@@ -49,9 +49,17 @@ const AdminSidebar = ({ isOpen, onClose }) => {
             >
               <LayoutDashboard className="w-4 h-4" /> Live Dashboard
             </NavLink>
-            <a href="#" className="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:bg-slate-800 rounded-xl font-medium text-xs transition">
+            <NavLink
+              to="/admin/pengguna"
+              onClick={onClose}
+              className={({ isActive }) => `flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition border ${
+                isActive
+                  ? 'bg-red-500/10 text-red-400 border-red-500/30'
+                  : 'text-slate-400 hover:bg-slate-800 border-transparent'
+              }`}
+            >
               <Users className="w-4 h-4" /> Kelola Pengguna
-            </a>
+            </NavLink>
             <NavLink
               to="/admin/relawan"
               onClick={onClose}
@@ -63,9 +71,17 @@ const AdminSidebar = ({ isOpen, onClose }) => {
             >
               <ShieldCheck className="w-4 h-4" /> Kelola Relawan
             </NavLink>
-            <a href="#" className="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:bg-slate-800 rounded-xl font-medium text-xs transition">
+            <NavLink
+              to="/admin/riwayat-laporan"
+              onClick={onClose}
+              className={({ isActive }) => `flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition border ${
+                isActive
+                  ? 'bg-red-500/10 text-red-400 border-red-500/30'
+                  : 'text-slate-400 hover:bg-slate-800 border-transparent'
+              }`}
+            >
               <History className="w-4 h-4" /> Riwayat Laporan
-            </a>
+            </NavLink>
           </nav>
         </div>
 
