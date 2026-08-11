@@ -13,9 +13,17 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
+
+app.get("/", (req, res) => {
+  res.json({ status: "success", message: "Server is running" });
+});
+
+
+app.use("/api/", api);
+
 app.use(middlewares.notFound);
 app.use(middlewares.errorHandler);
 
-app.use("/api/", api);
+
 
 export default app;
