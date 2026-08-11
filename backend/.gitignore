@@ -1,0 +1,15 @@
+# ========== Folder dependensi ==========
+node_modules/
+
+# ========== Hasil build (bisa dibuat ulang) ==========
+dist/
+
+# ========== File rahasia / lingkungan ==========
+.env
+.env.local
+.env.production
+
+# ========== File log & file sistem ==========
+*.log
+.DS_Store
+Thumbs.db
