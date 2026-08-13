@@ -31,4 +31,4 @@ function requireRole(...roles: ("user" | "volunteer" | "admin")[]) {
         next();
     }
 }
-export { authenticate };
+export { authenticate, requireRole };

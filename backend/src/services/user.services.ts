@@ -9,6 +9,10 @@ async function getUserByIdService(userId: string) {
     return user;
 }
 async function getAllUsersService(){
-    
+    const users = await User.find().select('-password'); // Exclude password field
+    if(!users || users.length === 0){
+        throw new AppError(404, 'Tidak ada pengguna ditemukan');
+    }
+    return users;
 }
-export { getUserByIdService };
+export { getUserByIdService, getAllUsersService };
