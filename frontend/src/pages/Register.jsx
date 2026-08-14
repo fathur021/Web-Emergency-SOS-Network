@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { Siren, User, Mail, Lock, ShieldCheck, ArrowRight } from 'lucide-react';
+import { useRegisterMutation } from '../redux/api/authApi';
+import { setCredentials } from '../redux/authSlice';
+
+
 
 const Register = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [isSuccess, setIsSuccess] = useState(false);
   const [formData, setFormData] = useState({
     nama: '',
@@ -11,6 +17,8 @@ const Register = () => {
     password: '',
     isVolunteer: false
   });
+
+  const [register, {data, error, isLoading}] = useRegisterMutation();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -20,15 +28,30 @@ const Register = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Register Data:', formData);
-    // Nanti akan dihubungkan ke Endpoint API POST /auth/register
 
-    setIsSuccess(true);
-    setTimeout(() => {
-      navigate('/login');
-    }, 700);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await register({
+        nama: formData.nama,
+        email: formData.email,
+        password: formData.password
+      }).unwrap();
+
+      // response = { status, message, data: { token, user } }
+      // Simpan ke Redux + localStorage lewat action setCredentials
+      dispatch(setCredentials(response.data));
+
+      console.log('Register berhasil:', response);
+
+      setIsSuccess(true);
+      setTimeout(() => navigate('/login'), 700);
+
+    } catch (err) {
+      console.error('Register gagal:', err?.data?.message);
+      alert(err?.data?.message || 'Registrasi gagal');
+    }
+
   };
 
   return (

@@ -1,7 +1,21 @@
 import React from 'react';
-import { Menu, Bell } from 'lucide-react';
+import { Menu, Bell, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '../redux/authSlice';
 
 const AdminTopBar = ({ onOpenSidebar, pendingCount = 1, inProgressCount = 1, volunteersCount = 14 }) => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  // Ambil data admin yang sedang login dari Redux
+  const user = useSelector((state) => state.auth.user);
+
+  const handleLogout = () => {
+    dispatch(logout());      // hapus token & user dari store + localStorage
+    navigate('/login');      // kembali ke halaman login
+  };
+
   return (
     <header className="h-16 border-b border-slate-800 bg-slate-900/60 px-4 md:px-6 flex items-center justify-between gap-4 shrink-0">
       <div className="flex items-center gap-3">
@@ -29,9 +43,26 @@ const AdminTopBar = ({ onOpenSidebar, pendingCount = 1, inProgressCount = 1, vol
       </div>
 
       <div className="flex items-center gap-3">
+        {/* Info admin yang login */}
+        {user && (
+          <div className="hidden sm:flex flex-col items-end leading-tight">
+            <p className="text-xs font-semibold text-slate-100">{user.nama}</p>
+            <p className="text-[10px] text-emerald-400 capitalize">● {user.role} active</p>
+          </div>
+        )}
+
         <button className="p-2 bg-slate-800 text-slate-300 rounded-xl relative hover:bg-slate-700 transition">
           <Bell className="w-4 h-4" />
           <span className="w-2 h-2 rounded-full bg-red-500 absolute top-1.5 right-1.5 animate-ping"></span>
+        </button>
+
+        {/* Tombol Logout */}
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-1.5 px-3 py-2 bg-slate-800 text-red-400 rounded-xl font-semibold text-xs hover:bg-red-500/10 transition"
+        >
+          <LogOut className="w-4 h-4" />
+          <span className="hidden md:inline">Keluar</span>
         </button>
       </div>
     </header>

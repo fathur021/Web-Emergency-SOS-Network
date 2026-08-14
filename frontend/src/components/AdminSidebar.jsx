@@ -1,15 +1,29 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '../redux/authSlice';
 import { 
   LayoutDashboard, 
   Users, 
   ShieldCheck, 
   History, 
   Siren, 
-  X 
+  X,
+  LogOut
 } from 'lucide-react';
 
 const AdminSidebar = ({ isOpen, onClose }) => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  // Ambil data admin yang sedang login dari Redux
+  const user = useSelector((state) => state.auth.user);
+
+  const handleLogout = () => {
+    dispatch(logout());      // hapus token & user dari store + localStorage
+    navigate('/login');      // kembali ke halaman login
+  };
+
   return (
     <>
       <aside 
@@ -85,15 +99,25 @@ const AdminSidebar = ({ isOpen, onClose }) => {
           </nav>
         </div>
 
-        {/* Info Petugas Admin */}
-        <div className="p-3 bg-slate-800/50 rounded-xl border border-slate-800 flex items-center gap-3 text-xs">
-          <div className="w-8 h-8 rounded-full bg-red-600 text-white font-bold flex items-center justify-center">
-            A
+        {/* Info Petugas Admin + Tombol Logout */}
+        <div className="space-y-2">
+          <div className="p-3 bg-slate-800/50 rounded-xl border border-slate-800 flex items-center gap-3 text-xs">
+            <div className="w-8 h-8 rounded-full bg-red-600 text-white font-bold flex items-center justify-center uppercase">
+              {user?.nama ? user.nama.charAt(0) : 'A'}
+            </div>
+            <div className="truncate">
+              <p className="font-semibold text-slate-200 truncate">{user?.nama || 'Admin'}</p>
+              <p className="text-[10px] text-emerald-400">● System Active</p>
+            </div>
           </div>
-          <div className="truncate">
-            <p className="font-semibold text-slate-200">Admin Command</p>
-            <p className="text-[10px] text-emerald-400">● System Active</p>
-          </div>
+
+          {/* Tombol Keluar */}
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-slate-800/50 rounded-xl border border-slate-800 text-red-400 font-semibold text-xs hover:bg-red-500/10 hover:border-red-500/30 transition"
+          >
+            <LogOut className="w-4 h-4" /> Keluar
+          </button>
         </div>
       </aside>
 

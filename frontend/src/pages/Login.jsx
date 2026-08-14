@@ -1,31 +1,62 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { Siren, Mail, Lock, ArrowRight, ShieldAlert } from 'lucide-react';
+import { useLoginMutation } from '../redux/api/authApi';
+import { setCredentials } from '../redux/authSlice';
 
 const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({ email: '', password: '' });
-  
+
   // State untuk mengontrol status animasi sukses
   const [isSuccess, setIsSuccess] = useState(false);
+
+  // Hook mutation login: mengembalikan [trigger, result]
+  // login()   -> memanggil POST /api/auth/login
+  // data      -> respons sukses dari backend
+  // error     -> objek error jika request gagal
+  // isLoading -> true selama request berjalan
+  const [login, { data, error, isLoading }] = useLoginMutation();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login Data:', formData);
+    try {
+      // Kirim { email, password } ke POST /api/auth/login.
+      // .unwrap() melempar error ke blok catch jika request gagal.
+      const response = await login({
+        email: formData.email,
+        password: formData.password,
+      }).unwrap();
 
-    // 1. Picu animasi keluar (split-screen terbelah)
-    setIsSuccess(true);
+      // response = { status, message, data: { token, user } }
+      // Simpan ke Redux + localStorage sekaligus lewat action setCredentials
+      dispatch(setCredentials(response.data));
 
-    // 2. Berikan jeda waktu (sesuai durasi animasi, misal 700ms) sebelum redirect
-    setTimeout(() => {
-      // Arahkan ke halaman utama atau dashboard sesuai kebutuhan
-      navigate('/');
-    }, 700);
+      console.log('Login berhasil:', response);
+
+      // Picu animasi keluar (split-screen terbelah)
+      setIsSuccess(true);
+
+      // Redirect sesuai role user (dari backend)
+      const role = response.data.user.role;
+      setTimeout(() => {
+        if (role === 'admin') navigate('/admin');
+        else if (role === 'volunteer') navigate('/volunteer');
+        else navigate('/');
+      }, 700);
+    } catch (err) {
+      // err.data.message berasal dari errorHandler backend:
+      // { status: "error", message: "Email atau password salah" }
+      console.error('Login gagal:', err?.data?.message);
+      alert(err?.data?.message || 'Login gagal');
+    }
   };
 
   return (
@@ -151,11 +182,18 @@ const Login = () => {
             {/* Tombol Submit Login */}
             <button
               type="submit"
-              disabled={isSuccess}
+              disabled={isLoading || isSuccess}
               className="w-full py-3 px-4 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-xl text-xs sm:text-sm shadow-lg shadow-red-600/20 flex items-center justify-center gap-2 transition disabled:opacity-50"
             >
-              {isSuccess ? 'Memproses...' : 'Masuk Sekarang'} <ArrowRight className="w-4 h-4" />
+              {isLoading ? 'Memproses...' : 'Masuk Sekarang'} <ArrowRight className="w-4 h-4" />
             </button>
+
+            {/* Tampilkan pesan error dari backend (misal "Email atau password salah") */}
+            {error && (
+              <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/30 rounded-xl p-3">
+                {error?.data?.message || 'Terjadi kesalahan, coba lagi.'}
+              </p>
+            )}
           </form>
 
           {/* Link ke Register */}

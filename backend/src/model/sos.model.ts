@@ -1,0 +1,48 @@
+import mongoose from "mongoose";
+import type {ISos} from "../interface/sos.interface.js";
+
+const sosSchema = new mongoose.Schema<ISos>({
+    // pengirim sinyal
+    userId : {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required:true,
+    },
+    //lokasi Kejadian
+    latitude: {
+        type: Number,
+        required:true,
+    },
+    longitude: {
+      type: Number,
+      required: true,
+    },
+
+    // ---- Deskripsi kejadian ----
+    description: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    // ---- Foto kejadian (opsional) ----
+    image: {
+      type: String,          // simpan path/URL, misal "/uploads/sos-123.jpg"
+      default: null,
+    },
+
+    // ---- Status penanganan ----
+    status: {
+      type: String,
+      enum: ["pending", "in_progress", "resolved", "rejected"],
+      default: "pending",    // baru dibuat = pending
+    },
+
+    // ---- Relawan yang menangani (opsional) ----
+    volunteerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",           // referensi ke model User
+      default: null,         // kosong saat belum ada relawan
+    },
+},
+    {timestamps:true}
+)
