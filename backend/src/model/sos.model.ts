@@ -46,3 +46,6 @@ const sosSchema = new mongoose.Schema<ISos>({
 },
     {timestamps:true}
 )
+const Sos = mongoose.model<ISos>("Sos", sosSchema);
+
+export { Sos };

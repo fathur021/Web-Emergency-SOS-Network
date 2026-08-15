@@ -1,8 +1,28 @@
 import Joi from "joi";
+import { AppError } from "../error/app.error.js";
 // ================================================================
 // Validasi Joi untuk data sinyal SOS.
 // Pola diikuti dari auth.validation.ts (pakai messages berbahasa Indonesia).
 // ================================================================
+
+// Helper: menjalankan schema Joi + mengubah error Joi menjadi AppError 400.
+// Dipindah dari auth.validation.ts agar sos.controller.ts tidak perlu
+// bergantung ke file validation milik modul auth.
+async function validateWith<T>(schema: Joi.ObjectSchema<T>, data: unknown): Promise<T> {
+  try {
+    // abortEarly: false => kumpulkan SEMUA error sekaligus, bukan berhenti di error pertama
+    // stripUnknown: true  => BUANG field yang tidak ada di schema
+    const value = await schema.validateAsync(data, {
+      abortEarly: false,
+      stripUnknown: true,
+    });
+
+    return value as T;
+  } catch (error) {
+    const validationError = error as Joi.ValidationError;
+    throw new AppError(400, validationError.message);
+  }
+}
 
 // ---- Schema: Membuat sinyal SOS baru ----
 // Dipakai di POST /api/sos (dikirim dari tombol SOS di halaman utama)
@@ -97,3 +117,5 @@ export const updateSosDataSchema = Joi.object({
       "string.base": "Gambar harus berupa teks",
     }),
 }).min(1); // wajib ada minimal 1 field yang diubah
+
+export { validateWith };
