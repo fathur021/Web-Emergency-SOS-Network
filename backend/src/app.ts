@@ -6,6 +6,7 @@ import cors from 'cors';
 import api from "./api/index.api.js";
 import * as middlewares from "./middleware/index.middleware.js";
 
+
 config();
 const app = express();
 app.use(morgan('dev'));
@@ -20,6 +21,7 @@ app.get("/", (req, res) => {
 
 
 app.use("/api/", api);
+app.use("/uploads", express.static("uploads"));
 
 app.use(middlewares.notFound);
 app.use(middlewares.errorHandler);

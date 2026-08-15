@@ -43,6 +43,9 @@ async function createSosController(req: Request, res: Response, next: NextFuncti
     // (3) value sudah bersih → pakai sebagai input
     const input = value as ICreateSosInput;
 
+    if (req.file) {
+      input.image = `/uploads/${req.file.filename}`;
+    }
     // (4) userId diambil dari token JWT, bukan dari body
     const sos = await createSosServices(req.user!._id, input);
 

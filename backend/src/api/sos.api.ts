@@ -9,6 +9,8 @@ import {
   deleteSosController,
 } from "../controller/sos.controller.js";
 import { authenticate, requireRole } from "../middleware/auth.middleware.js";
+import { upload } from "../utils/upload.utils.js";
+
 
 const router = express.Router();
 
@@ -17,7 +19,7 @@ router.use(authenticate);
 
 // ---- POST /api/sos ----
 // User mengirim sinyal SOS baru
-router.post("/", createSosController);
+router.post("/", upload.single("image"), createSosController);
 
 // PENTING: route "/user" HARUS ditaruh SEBELUM "/:id".
 // Kalau tidak, "user" akan dianggap sebagai id oleh Express.

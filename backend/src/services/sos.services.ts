@@ -6,6 +6,8 @@ import type {
   IUpdateSosDataInput,
   IUpdateSosStatusInput,
 } from "../interface/sos.interface.js";
+import { unlink } from "fs/promises";
+import path from "path";
 
 async function createSosServices(
   userId: string | Types.ObjectId,
@@ -90,24 +92,31 @@ async function updateSosDataServices(id: string, input: IUpdateSosDataInput) {
     throw new AppError(404, "Sinyal SOS tidak ditemukan");
   }
 
-  const sos = await Sos.findByIdAndUpdate(id,input, {new:true});
-  return sos
+  const sos = await Sos.findByIdAndUpdate(id, input, { new: true });
+  return sos;
 }
 
-async function deleteSosServices(id:string){
-    const existing = await Sos.findById(id);
-    if (!existing) {
+async function deleteSosServices(id: string) {
+  const existing = await Sos.findById(id);
+  if (!existing) {
     throw new AppError(404, "Sinyal SOS tidak ditemukan");
+  }
+  if (existing.image) {
+    const filename = existing.image.replace("/uploads/", "");
+    await unlink(path.join("uploads", filename)).catch(()=>{
+
+    })
   }
 
   await Sos.findByIdAndDelete(id);
-  return {message: "Sinyal Sos Berhasil di hapus"}
+  return { message: "Sinyal Sos Berhasil di hapus" };
 }
-export { createSosServices,
-    getAllSosServices,
-    getSosByIdServices,
-    getSosByUserServices,
-    updateSosStatusServices,
-    updateSosDataServices,
-    deleteSosServices
- };
+export {
+  createSosServices,
+  getAllSosServices,
+  getSosByIdServices,
+  getSosByUserServices,
+  updateSosStatusServices,
+  updateSosDataServices,
+  deleteSosServices,
+};

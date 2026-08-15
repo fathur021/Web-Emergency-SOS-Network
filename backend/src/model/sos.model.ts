@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import type {ISos} from "../interface/sos.interface.js";
+import { formatWIB } from "../utils/date.utils.js";
 
 const sosSchema = new mongoose.Schema<ISos>({
     // pengirim sinyal
@@ -46,6 +47,17 @@ const sosSchema = new mongoose.Schema<ISos>({
 },
     {timestamps:true}
 )
+
+// Otomatis ubah createdAt/updatedAt ke WIB setiap dokumen dijadikan JSON.
+// Berlaku untuk SEMUA controller yang mengirim data SOS.
+sosSchema.set("toJSON", {
+    transform: (_doc, ret: any) => {
+        ret.createdAt = formatWIB(ret.createdAt);
+        ret.updatedAt = formatWIB(ret.updatedAt);
+        return ret;
+    },
+});
+
 const Sos = mongoose.model<ISos>("Sos", sosSchema);
 
 export { Sos };
