@@ -20,13 +20,13 @@ const baseQuery = fetchBaseQuery({
 
   // (Opsional) Kalau nanti ada endpoint yang butuh token JWT,
   // uncomment blok ini agar Authorization header terkirim otomatis:
-  // prepareHeaders: (headers) => {
-  //   const token = localStorage.getItem('token');
-  //   if (token) {
-  //     headers.set('Authorization', `Bearer ${token}`);
-  //   }
-  //   return headers;
-  // },
+  prepareHeaders: (headers) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+    return headers;
+  },
 });
 
 // ---- 3. Definisikan API ----

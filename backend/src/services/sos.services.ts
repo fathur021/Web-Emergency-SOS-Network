@@ -17,7 +17,7 @@ async function createSosServices(
     userId,
     latitude: input.latitude,
     longitude: input.longitude,
-    description: input.description,
+    description: input.description || "",
     image: input.image || null,
   });
   return sos;
@@ -28,10 +28,6 @@ async function getAllSosServices() {
     .populate("userId", "nama email")
     .populate("volunteerId", "nama")
     .sort({ createdAt: -1 });
-
-  if (!sos || sos.length == 0) {
-    throw new AppError(404, "Belum ada sinyal SOS");
-  }
   return sos;
 }
 

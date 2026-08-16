@@ -26,7 +26,11 @@ import type {
 // ==================================================================
 // Contoh validasi MANUAL (tanpa validateWith) pakai try/catch,
 // supaya terlihat apa yang sebenarnya dilakukan validateWith.
-async function createSosController(req: Request, res: Response, next: NextFunction) {
+async function createSosController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   try {
     // (1) Validasi manual: validate() TIDAK melempar error,
     //     hasilnya ada di { error, value }
@@ -49,6 +53,10 @@ async function createSosController(req: Request, res: Response, next: NextFuncti
     // (4) userId diambil dari token JWT, bukan dari body
     const sos = await createSosServices(req.user!._id, input);
 
+    await sos.populate("userId", "nama email");
+
+    const io = req.app.get("io");
+    io.emit("sos:new", sos);
     // (5) Respons sukses 201 (Created)
     res.status(201).json({
       status: "success",
@@ -77,7 +85,10 @@ async function getAllSosController(req: Request, res: Response) {
 // ==================================================================
 // GET /api/sos/:id  --  Mendapatkan detail satu sinyal SOS
 // ==================================================================
-async function getSosByIdController(req: Request<{ id: string }>, res: Response) {
+async function getSosByIdController(
+  req: Request<{ id: string }>,
+  res: Response,
+) {
   const { id } = req.params;
   const sos = await getSosByIdServices(id);
 
@@ -105,12 +116,19 @@ async function getSosByUserController(req: Request, res: Response) {
 // ==================================================================
 // PATCH /api/sos/:id/status  --  Mengubah status penanganan
 // ==================================================================
-async function updateSosStatusController(req: Request<{ id: string }>, res: Response) {
+async function updateSosStatusController(
+  req: Request<{ id: string }>,
+  res: Response,
+) {
   const { id } = req.params;
-  const input = await validateWith<IUpdateSosStatusInput>(updateSosStatusSchema, req.body);
+  const input = await validateWith<IUpdateSosStatusInput>(
+    updateSosStatusSchema,
+    req.body,
+  );
   const volunteerId = req.user!._id;
   const sos = await updateSosStatusServices(id, input, volunteerId);
-
+  const io = req.app.get("io");
+  io.emit("sos:update", sos);
   res.status(200).json({
     status: "success",
     message: "Status sinyal SOS berhasil diperbarui",
@@ -121,9 +139,15 @@ async function updateSosStatusController(req: Request<{ id: string }>, res: Resp
 // ==================================================================
 // PATCH /api/sos/:id/data  --  Mengoreksi data (lokasi/deskripsi/foto)
 // ==================================================================
-async function updateSosDataController(req: Request<{ id: string }>, res: Response) {
+async function updateSosDataController(
+  req: Request<{ id: string }>,
+  res: Response,
+) {
   const { id } = req.params;
-  const input = await validateWith<IUpdateSosDataInput>(updateSosDataSchema, req.body);
+  const input = await validateWith<IUpdateSosDataInput>(
+    updateSosDataSchema,
+    req.body,
+  );
   const sos = await updateSosDataServices(id, input);
 
   res.status(200).json({
@@ -136,7 +160,10 @@ async function updateSosDataController(req: Request<{ id: string }>, res: Respon
 // ==================================================================
 // DELETE /api/sos/:id  --  Menghapus sinyal SOS
 // ==================================================================
-async function deleteSosController(req: Request<{ id: string }>, res: Response) {
+async function deleteSosController(
+  req: Request<{ id: string }>,
+  res: Response,
+) {
   const { id } = req.params;
   const result = await deleteSosServices(id);
 

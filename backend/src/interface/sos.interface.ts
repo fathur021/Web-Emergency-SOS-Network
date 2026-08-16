@@ -19,7 +19,7 @@ export interface ISos {
   longitude: number;
 
   // deskripsi / kronologi kejadian
-  description: string;
+  description?: string;
 
   // path / URL foto kejadian (opsional)
   image?: string | null;
@@ -36,7 +36,7 @@ export interface ISos {
 export interface ICreateSosInput {
   latitude: number;
   longitude: number;
-  description: string;
+  description?: string;
   image?: string;
 }
 

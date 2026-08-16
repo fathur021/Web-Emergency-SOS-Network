@@ -45,7 +45,7 @@ const Register = () => {
       console.log('Register berhasil:', response);
 
       setIsSuccess(true);
-      setTimeout(() => navigate('/login'), 700);
+      setTimeout(() => navigate('/'), 700);
 
     } catch (err) {
       console.error('Register gagal:', err?.data?.message);

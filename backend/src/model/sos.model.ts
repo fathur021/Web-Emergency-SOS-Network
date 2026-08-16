@@ -22,7 +22,7 @@ const sosSchema = new mongoose.Schema<ISos>({
     // ---- Deskripsi kejadian ----
     description: {
       type: String,
-      required: true,
+      default:"",
       trim: true,
     },
     // ---- Foto kejadian (opsional) ----
