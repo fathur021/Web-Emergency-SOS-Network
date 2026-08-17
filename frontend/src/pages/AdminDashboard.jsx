@@ -49,7 +49,24 @@ const AdminDashboard = () => {
 
       {/* Map View */}
       <section className="flex-1 relative bg-slate-950 hidden md:block">
-        <MapView />
+        <MapView
+          markers={incidents
+            .filter((item) => {
+              const match = item.location.startsWith('Lat: ');
+              return match;
+            })
+            .map((item) => {
+              const parts = item.location.replace('Lat: ', '').split(', Lng: ');
+              return {
+                id: item.id,
+                lat: parseFloat(parts[0]),
+                lng: parseFloat(parts[1]),
+                title: item.title,
+                desc: item.desc,
+                reporter: item.reporter,
+              };
+            })}
+        />
       </section>
     </>
   );

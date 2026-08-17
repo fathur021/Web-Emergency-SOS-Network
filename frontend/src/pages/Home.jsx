@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SosCard from '../components/SosCard';
 import MapView from '../components/MapContainer';
 const Home = () => {
+  const [coords, setCoords] = useState({ latitude: -9.947, longitude: 100.354 })
   return (
     <div className="relative w-screen h-screen bg-slate-950 font-sans text-slate-100 overflow-hidden flex items-center justify-center">
       
@@ -12,12 +13,12 @@ const Home = () => {
 
       {/* 2. PETA (React Leaflet MapView) */}
       <div className="absolute inset-x-0 top-[68px] md:top-[84px] bottom-0 z-0">
-        <MapView />
+        <MapView latitude={coords.latitude} longitude={coords.longitude}/>
       </div>
 
       {/* 3. MAIN CONTENT (TOMBOL SOS CARD) */}
       <main className="relative z-20 p-4">
-        <SosCard />
+        <SosCard onCoordsChange={setCoords}/>
       </main>
 
       {/* 4. FOOTER */}
