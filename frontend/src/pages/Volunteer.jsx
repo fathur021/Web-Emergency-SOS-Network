@@ -1,8 +1,11 @@
 import { useOutletContext } from 'react-router-dom';
 import MapView from '../components/MapContainer';
+import { useGetVolunteersQuery } from '../redux/api/sos.Api';
 
 const Volunteer = () => {
   const { sosList } = useOutletContext();
+  const { data: volunteersData } = useGetVolunteersQuery();
+
   // Ubah data SOS dari backend jadi format markers yang dimengerti MapView:
   // [ { id, lat, lng, title, desc, reporter }, ... ]
   const markers = sosList
@@ -15,11 +18,24 @@ const Volunteer = () => {
       desc: s.description || "",
       reporter: s.userId?.nama || "Anonim",
     }));
+
+  // Ubah data relawan jadi format markers:
+  // [ { lat, lng, nama, locationName, radius }, ... ]
+  const volunteerMarkers = (volunteersData?.data || [])
+    .filter((v) => v.latitude != null && v.longitude != null)
+    .map((v) => ({
+      lat: v.latitude,
+      lng: v.longitude,
+      nama: v.nama,
+      locationName: v.locationName || "",
+      radius: v.radius || 5000,
+    }));
+
   return (
     <>
-      {/* Peta Radar SOS */}
+      {/* Peta Radar SOS + Lokasi Relawan */}
       <div className="absolute inset-0">
-        <MapView  markers={markers} zoom={12}/>
+        <MapView markers={markers} volunteers={volunteerMarkers} zoom={12} />
       </div>
     </>
   );

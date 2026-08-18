@@ -5,5 +5,7 @@ export interface IUser {
     role : "user" | "volunteer" | "admin";
     latitude : number;
     longitude : number;
+    locationName : string;
+    radius : number;
     isVolunteerActive : boolean;
 }

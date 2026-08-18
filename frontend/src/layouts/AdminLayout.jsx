@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import AdminSidebar from "../components/AdminSidebar";
 import AdminTopBar from "../components/AdminTopBar";
-import { useGetAllSosQuery } from "../redux/api/sos.Api";
+import { useGetAllSosQuery, useGetVolunteersQuery } from "../redux/api/sos.Api";
 import { getSocket } from "../services/socket";
 
 const statusMap = {
@@ -18,6 +18,7 @@ const AdminLayout = () => {
 
   //1. ambil data awal dari get /api/sos
   const { data } = useGetAllSosQuery();
+  const { data: volunteersData } = useGetVolunteersQuery();
 
   useEffect(() => {
     if (data?.data) {
@@ -35,6 +36,25 @@ const AdminLayout = () => {
       );
     }
   }, [data]);
+
+  //3. ambil data relawan untuk ditampilkan di peta
+  const [volunteers, setVolunteers] = useState([]);
+
+  useEffect(() => {
+    if (volunteersData?.data) {
+      setVolunteers(
+        volunteersData.data
+          .filter((v) => v.latitude != null && v.longitude != null)
+          .map((v) => ({
+            lat: v.latitude,
+            lng: v.longitude,
+            nama: v.nama,
+            locationName: v.locationName || "",
+            radius: v.radius || 5000,
+          }))
+      );
+    }
+  }, [volunteersData]);
 
 // 2. Real-time: SOS baru yang dikirim user langsung muncul via socket
   useEffect(() => {
@@ -81,7 +101,7 @@ const AdminLayout = () => {
 
         {/* HALAMAN YANG DITUJU */}
         <div className="flex-1 flex overflow-hidden">
-          <Outlet context={{ incidents, setIncidents }} />
+          <Outlet context={{ incidents, setIncidents, volunteers }} />
         </div>
       </div>
     </div>

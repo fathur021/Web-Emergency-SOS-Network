@@ -16,8 +16,23 @@ const baseQuery = fetchBaseQuery({
 export const sosApi = createApi({
   reducerPath: "sosApi",
   baseQuery,
-  tagTypes: ["Sos"],
+  tagTypes: ["Sos", "User", "Volunteer"],
   endpoints: (builder) => ({
+    // GET /api/user/profile — ambil profil user yang login
+    getProfile: builder.query({
+      query: () => "/user/profile",
+      providesTags: ["User"],
+    }),
+
+    // PATCH /api/user/location — update lokasi & radius
+    updateLocation: builder.mutation({
+      query: (body) => ({
+        url: "/user/location",
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["User"],
+    }),
     // POST /api/sos — kirim sinyal SOS (FormData: lat, lng, desc?, foto?)
     createSos: builder.mutation({
       query: (formData) => ({
@@ -49,6 +64,12 @@ export const sosApi = createApi({
       }),
       invalidatesTags: ["Sos"],
     }),
+
+    // GET /api/user/volunteers — semua relawan aktif beserta lokasi
+    getVolunteers: builder.query({
+      query: () => "/user/volunteers",
+      providesTags: ["Volunteer"],
+    }),
   }),
 });
 
@@ -57,4 +78,7 @@ export const {
   useGetAllSosQuery,
   useGetSosByUserQuery,
   useUpdateSosStatusMutation,
+  useGetProfileQuery,
+  useUpdateLocationMutation,
+  useGetVolunteersQuery,
 } = sosApi;

@@ -19,8 +19,23 @@ const createSosIcon = () => {
   });
 };
 
-// Component helper: auto-fit bounds ke semua marker (untuk admin)
-// atau recenter ke 1 titik (untuk user).
+// 2. Kustomisasi Icon Marker Relawan (hijau, tanpa animasi ping)
+const createVolunteerIcon = () => {
+  return L.divIcon({
+    className: 'custom-volunteer-marker',
+    html: `
+      <div class="relative flex items-center justify-center">
+        <div class="w-8 h-8 rounded-full bg-emerald-600 border-2 border-white flex items-center justify-center text-xs shadow-lg">
+          🟢
+        </div>
+      </div>
+    `,
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+  });
+};
+
+// Component helper: auto-fit bounds ke semua marker (termasuk relawan + SOS)
 const FitBounds = ({ markers }) => {
   const map = useMap();
 
@@ -38,13 +53,20 @@ const FitBounds = ({ markers }) => {
   return null;
 };
 
-// markers = array [ { lat, lng, title, desc }, ... ] → admin
+// markers = array [ { lat, lng, title, desc }, ... ] → SOS
+// volunteers = array [ { lat, lng, nama, locationName, radius }, ... ] → relawan
 // latitude/longitude = 1 titik → user/relawan
-const MapView = ({ latitude, longitude, markers = [], zoom = 13 }) => {
+const MapView = ({ latitude, longitude, markers = [], volunteers = [], zoom = 13 }) => {
+  // Gabungkan semua titik untuk auto-fit bounds
+  const allPoints = [
+    ...markers.map((m) => ({ lat: m.lat, lng: m.lng })),
+    ...volunteers.map((v) => ({ lat: v.lat, lng: v.lng })),
+  ];
+
   // Tentukan center awal peta
   let center;
-  if (markers.length > 0) {
-    center = [markers[0].lat, markers[0].lng];
+  if (allPoints.length > 0) {
+    center = [allPoints[0].lat, allPoints[0].lng];
   } else {
     center = [latitude ?? -0.947, longitude ?? 100.354];
   }
@@ -62,7 +84,7 @@ const MapView = ({ latitude, longitude, markers = [], zoom = 13 }) => {
       />
 
       {/* Marker tunggal (Home / relawan) — tampil hanya kalau TIDAK pakai markers array */}
-      {markers.length === 0 && latitude != null && longitude != null && (
+      {markers.length === 0 && volunteers.length === 0 && latitude != null && longitude != null && (
         <>
           <Marker position={[latitude, longitude]} icon={createSosIcon()}>
             <Popup className="custom-popup">
@@ -76,7 +98,7 @@ const MapView = ({ latitude, longitude, markers = [], zoom = 13 }) => {
         </>
       )}
 
-      {/* Multi marker (admin) */}
+      {/* Multi marker SOS */}
       {markers.map((m, i) => (
         <Marker key={m.id || i} position={[m.lat, m.lng]} icon={createSosIcon()}>
           <Popup className="custom-popup">
@@ -89,8 +111,22 @@ const MapView = ({ latitude, longitude, markers = [], zoom = 13 }) => {
         </Marker>
       ))}
 
-      {/* Auto-fit ke semua marker kalau pakai mode multi-marker */}
-      {markers.length > 0 && <FitBounds markers={markers} />}
+      {/* Marker relawan */}
+      {volunteers.map((v, i) => (
+        <Marker key={`vol-${i}`} position={[v.lat, v.lng]} icon={createVolunteerIcon()}>
+          <Popup className="custom-popup">
+            <div className="text-slate-900 font-sans p-1">
+              <h4 className="font-bold text-sm text-emerald-600">Relawan</h4>
+              <p className="text-xs text-slate-700 font-semibold mt-1">{v.nama}</p>
+              {v.locationName && <p className="text-[10px] text-slate-500 mt-1">📍 {v.locationName}</p>}
+              {v.radius && <p className="text-[10px] text-slate-500">Radius: {(v.radius / 1000).toFixed(1)} km</p>}
+            </div>
+          </Popup>
+        </Marker>
+      ))}
+
+      {/* Auto-fit ke semua marker kalau ada titik */}
+      {allPoints.length > 0 && <FitBounds markers={allPoints} />}
     </MapContainer>
   );
 };

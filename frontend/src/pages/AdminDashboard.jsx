@@ -3,7 +3,7 @@ import { useOutletContext } from 'react-router-dom';
 import MapView from '../components/MapContainer';
 
 const AdminDashboard = () => {
-  const { incidents } = useOutletContext();
+  const { incidents, volunteers } = useOutletContext();
 
   return (
     <>
@@ -50,6 +50,7 @@ const AdminDashboard = () => {
       {/* Map View */}
       <section className="flex-1 relative bg-slate-950 hidden md:block">
         <MapView
+          volunteers={volunteers || []}
           markers={incidents
             .filter((item) => {
               const match = item.location.startsWith('Lat: ');

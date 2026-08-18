@@ -15,4 +15,25 @@ async function getAllUsersService(){
     }
     return users;
 }
-export { getUserByIdService, getAllUsersService };
+async function updateLocationService(userId: string, data: { latitude: number; longitude: number; locationName: string; radius: number }) {
+    const user = await User.findByIdAndUpdate(
+        userId,
+        { latitude: data.latitude, longitude: data.longitude, locationName: data.locationName, radius: data.radius },
+        { new: true }
+    ).select('-password');
+    if (!user) {
+        throw new AppError(404, 'Pengguna tidak ditemukan');
+    }
+    return user;
+}
+
+async function getVolunteersService() {
+    const volunteers = await User.find({
+        role: "volunteer",
+        latitude: { $ne: null },
+        longitude: { $ne: null },
+    }).select('nama latitude longitude locationName radius isVolunteerActive');
+    return volunteers;
+}
+
+export { getUserByIdService, getAllUsersService, updateLocationService, getVolunteersService };

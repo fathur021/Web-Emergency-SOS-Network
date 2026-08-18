@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Home from './pages/Home.jsx'
 import Volunteer from './pages/Volunteer.jsx'
 import RiwayatBantuan from './pages/RiwayatBantuan.jsx'
+import PengaturanRadius from './pages/PengaturanRadius.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx'
 import KelolaRelawan from './pages/KelolaRelawan.jsx'
 import RiwayatLaporan from './pages/RiwayatLaporan.jsx'
@@ -26,6 +27,7 @@ const App = () => {
           <Route path="/volunteer" element={<VolunterLayouts />}>
             <Route index element={<Volunteer />} />
             <Route path="riwayat" element={<RiwayatBantuan />} />
+            <Route path="pengaturan-radius" element={<PengaturanRadius />} />
           </Route>
         </Route>
 

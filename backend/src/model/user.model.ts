@@ -36,6 +36,17 @@ const userSchema = new mongoose.Schema<IUser>(
       type: Number,
     },
 
+    locationName: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    radius: {
+      type: Number,
+      default: 5000,
+    },
+
     isVolunteerActive: {
       type: Boolean,
       default: false,

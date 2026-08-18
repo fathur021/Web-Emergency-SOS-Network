@@ -52,10 +52,18 @@ const VolunteerSideBar = ({ isOpen, onClose }) => {
               <History className="w-4 h-4" />
               <span>Riwayat Bantuan</span>
             </NavLink>
-            <a href="#" className="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:bg-slate-800 rounded-xl font-medium text-xs transition">
+            <NavLink
+              to="/volunteer/pengaturan-radius"
+              onClick={onClose}
+              className={({ isActive }) => `flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition ${
+                isActive
+                  ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
+                  : 'text-slate-400 hover:bg-slate-800 border border-transparent'
+              }`}
+            >
               <Settings className="w-4 h-4" />
               <span>Pengaturan Radius</span>
-            </a>
+            </NavLink>
           </nav>
         </div>
 
