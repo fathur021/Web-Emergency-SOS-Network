@@ -10,7 +10,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useCreateSosMutation } from "../redux/api/sos.Api";
 
-const DEFAULT_COORDS = { latitude: -9.947, longitude: 100.354 };
+const DEFAULT_COORDS = { latitude: -0.947, longitude: 100.354 };
 
 const SosCard = ({ onCoordsChange }) => {
   const [isSosSent, setIsSosSent] = useState(false);

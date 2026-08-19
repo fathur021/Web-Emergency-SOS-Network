@@ -1,1 +1,12 @@
 @import "tailwindcss";
+
+/* Leaflet overrides - HARUS di luar @layer supaya menang atas Tailwind preflight */
+.leaflet-container {
+  background: #0f172a;
+}
+.leaflet-container img,
+.leaflet-container video {
+  max-width: none !important;
+  max-height: none !important;
+  display: inline !important;
+}

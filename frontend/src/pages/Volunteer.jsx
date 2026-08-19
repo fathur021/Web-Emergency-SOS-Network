@@ -34,7 +34,7 @@ const Volunteer = () => {
   return (
     <>
       {/* Peta Radar SOS + Lokasi Relawan */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 z-0">
         <MapView markers={markers} volunteers={volunteerMarkers} zoom={12} />
       </div>
     </>

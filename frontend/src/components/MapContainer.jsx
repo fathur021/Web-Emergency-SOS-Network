@@ -1,8 +1,7 @@
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
 import L from 'leaflet';
 
-// 1. Kustomisasi Icon Marker SOS (Menggunakan Tailwind & HTML)
 const createSosIcon = () => {
   return L.divIcon({
     className: 'custom-sos-marker',
@@ -19,7 +18,6 @@ const createSosIcon = () => {
   });
 };
 
-// 2. Kustomisasi Icon Marker Relawan (hijau, tanpa animasi ping)
 const createVolunteerIcon = () => {
   return L.divIcon({
     className: 'custom-volunteer-marker',
@@ -35,7 +33,28 @@ const createVolunteerIcon = () => {
   });
 };
 
-// Component helper: auto-fit bounds ke semua marker (termasuk relawan + SOS)
+const MapFixer = () => {
+  const map = useMap();
+
+  useLayoutEffect(() => {
+    const container = map.getContainer();
+
+    requestAnimationFrame(() => {
+      map.invalidateSize();
+      requestAnimationFrame(() => map.invalidateSize());
+    });
+
+    const observer = new ResizeObserver(() => {
+      map.invalidateSize();
+    });
+    observer.observe(container);
+
+    return () => observer.disconnect();
+  }, [map]);
+
+  return null;
+};
+
 const FitBounds = ({ markers }) => {
   const map = useMap();
 
@@ -53,17 +72,12 @@ const FitBounds = ({ markers }) => {
   return null;
 };
 
-// markers = array [ { lat, lng, title, desc }, ... ] → SOS
-// volunteers = array [ { lat, lng, nama, locationName, radius }, ... ] → relawan
-// latitude/longitude = 1 titik → user/relawan
 const MapView = ({ latitude, longitude, markers = [], volunteers = [], zoom = 13 }) => {
-  // Gabungkan semua titik untuk auto-fit bounds
   const allPoints = [
     ...markers.map((m) => ({ lat: m.lat, lng: m.lng })),
     ...volunteers.map((v) => ({ lat: v.lat, lng: v.lng })),
   ];
 
-  // Tentukan center awal peta
   let center;
   if (allPoints.length > 0) {
     center = [allPoints[0].lat, allPoints[0].lng];
@@ -76,14 +90,14 @@ const MapView = ({ latitude, longitude, markers = [], volunteers = [], zoom = 13
       center={center}
       zoom={zoom}
       scrollWheelZoom={true}
-      className="w-full h-full z-0"
+      className="w-full h-full"
     >
+      <MapFixer />
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
         url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
       />
 
-      {/* Marker tunggal (Home / relawan) — tampil hanya kalau TIDAK pakai markers array */}
       {markers.length === 0 && volunteers.length === 0 && latitude != null && longitude != null && (
         <>
           <Marker position={[latitude, longitude]} icon={createSosIcon()}>
@@ -98,7 +112,6 @@ const MapView = ({ latitude, longitude, markers = [], volunteers = [], zoom = 13
         </>
       )}
 
-      {/* Multi marker SOS */}
       {markers.map((m, i) => (
         <Marker key={m.id || i} position={[m.lat, m.lng]} icon={createSosIcon()}>
           <Popup className="custom-popup">
@@ -111,7 +124,6 @@ const MapView = ({ latitude, longitude, markers = [], volunteers = [], zoom = 13
         </Marker>
       ))}
 
-      {/* Marker relawan */}
       {volunteers.map((v, i) => (
         <Marker key={`vol-${i}`} position={[v.lat, v.lng]} icon={createVolunteerIcon()}>
           <Popup className="custom-popup">
@@ -125,7 +137,6 @@ const MapView = ({ latitude, longitude, markers = [], volunteers = [], zoom = 13
         </Marker>
       ))}
 
-      {/* Auto-fit ke semua marker kalau ada titik */}
       {allPoints.length > 0 && <FitBounds markers={allPoints} />}
     </MapContainer>
   );

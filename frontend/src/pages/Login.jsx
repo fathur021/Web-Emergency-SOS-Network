@@ -39,7 +39,7 @@ const Login = () => {
       // Simpan ke Redux + localStorage sekaligus lewat action setCredentials
       dispatch(setCredentials(response.data));
 
-      console.log('Login berhasil:', response);
+      // console.log('Login berhasil:', response);
 
       // Picu animasi keluar (split-screen terbelah)
       setIsSuccess(true);
