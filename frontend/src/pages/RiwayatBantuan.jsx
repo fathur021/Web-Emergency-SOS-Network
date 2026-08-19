@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import {
   Search,
   MapPin,
@@ -6,90 +7,79 @@ import {
   Clock,
   XCircle,
   Siren,
-  ChevronRight
+  Check,
 } from 'lucide-react';
+import {
+  useGetAllSosQuery,
+  useUpdateSosStatusMutation,
+} from '../redux/api/sos.Api';
+
+// volunteerId bisa berupa objek hasil populate { _id, nama } atau string/ObjectId
+const getVolunteerId = (s) =>
+  s?.volunteerId ? String(s.volunteerId._id ?? s.volunteerId) : null;
+
+const STATUS_META = {
+  pending: {
+    label: 'Menunggu',
+    style: 'bg-red-500/20 text-red-400 border border-red-500/30',
+    icon: <Siren className="w-3 h-3" />,
+  },
+  in_progress: {
+    label: 'Dalam Proses',
+    style: 'bg-amber-500/20 text-amber-400 border border-amber-500/30',
+    icon: <Clock className="w-3 h-3" />,
+  },
+  resolved: {
+    label: 'Selesai',
+    style: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
+    icon: <CheckCircle2 className="w-3 h-3" />,
+  },
+  rejected: {
+    label: 'Ditolak',
+    style: 'bg-red-500/20 text-red-400 border border-red-500/30',
+    icon: <XCircle className="w-3 h-3" />,
+  },
+};
 
 const RiwayatBantuan = () => {
   const [filter, setFilter] = useState('Semua');
   const [search, setSearch] = useState('');
 
-  const history = [
-    {
-      id: 104,
-      title: 'Kebakaran Rumah',
-      location: 'Jl. Melati No. 8',
-      date: '08 Agu 2026',
-      time: '14:30',
-      status: 'Selesai',
-      desc: 'Kebakaran rumah warga, dibantu evakuasi dan pemadaman awal.'
-    },
-    {
-      id: 103,
-      title: 'Kecelakaan Lalu Lintas',
-      location: 'Jl. Jendral Sudirman No. 42',
-      date: '07 Agu 2026',
-      time: '09:15',
-      status: 'Selesai',
-      desc: 'Pengendara motor terjatuh, pertolongan pertama dilakukan.'
-    },
-    {
-      id: 102,
-      title: 'Pohon Tumbang',
-      location: 'Jl. Ahmad Yani (Taman City)',
-      date: '06 Agu 2026',
-      time: '17:45',
-      status: 'Dalam Proses',
-      desc: 'Menutup akses jalan, sedang menunggu tim tambahan.'
-    },
-    {
-      id: 101,
-      title: 'Genangan Air / Banjir',
-      location: 'Jl. Riau No. 12',
-      date: '05 Agu 2026',
-      time: '11:00',
-      status: 'Ditolak',
-      desc: 'Laporan ganda, ditangani relawan lain.'
-    },
-    {
-      id: 100,
-      title: 'Orang Hilang',
-      location: 'Jl. Pemuda No. 3',
-      date: '04 Agu 2026',
-      time: '20:10',
-      status: 'Selesai',
-      desc: 'Warga lanjut usia ditemukan dalam kondisi sehat.'
+  const user = useSelector((state) => state.auth.user);
+  const { data } = useGetAllSosQuery();
+  const [updateSosStatus] = useUpdateSosStatusMutation();
+
+  // Hanya SOS yang ditangani relawan yang login
+  const history = (data?.data || []).filter(
+    (s) => s.volunteerId && getVolunteerId(s) === user?.id,
+  );
+
+  const handleResolve = async (id) => {
+    try {
+      await updateSosStatus({ id, status: 'resolved' }).unwrap();
+    } catch (e) {
+      alert(e?.data?.message || 'Gagal menandai selesai, coba lagi');
     }
-  ];
-
-  const statusStyles = {
-    Selesai: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
-    'Dalam Proses': 'bg-amber-500/20 text-amber-400 border border-amber-500/30',
-    Ditolak: 'bg-red-500/20 text-red-400 border border-red-500/30',
-    Pending: 'bg-red-500 text-white'
   };
 
-  const statusIcons = {
-    Selesai: <CheckCircle2 className="w-3 h-3" />,
-    'Dalam Proses': <Clock className="w-3 h-3" />,
-    Ditolak: <XCircle className="w-3 h-3" />,
-    Pending: <Siren className="w-3 h-3" />
-  };
-
-  const filters = ['Semua', 'Selesai', 'Dalam Proses', 'Ditolak'];
+  const filters = ['Semua', 'Selesai', 'Dalam Proses', 'Ditolak', 'Menunggu'];
 
   const filtered = history.filter((item) => {
-    const matchStatus = filter === 'Semua' || item.status === filter;
+    const label = STATUS_META[item.status]?.label;
+    const matchStatus = filter === 'Semua' || label === filter;
     const matchSearch =
-      item.title.toLowerCase().includes(search.toLowerCase()) ||
-      item.location.toLowerCase().includes(search.toLowerCase());
+      (item.description || '').toLowerCase().includes(search.toLowerCase()) ||
+      `${item.latitude}, ${item.longitude}`
+        .toLowerCase()
+        .includes(search.toLowerCase());
     return matchStatus && matchSearch;
   });
 
   const counts = {
     total: history.length,
-    selesai: history.filter((i) => i.status === 'Selesai').length,
-    proses: history.filter((i) => i.status === 'Dalam Proses').length,
-    ditolak: history.filter((i) => i.status === 'Ditolak').length
+    selesai: history.filter((i) => i.status === 'resolved').length,
+    proses: history.filter((i) => i.status === 'in_progress').length,
+    ditolak: history.filter((i) => i.status === 'rejected').length,
   };
 
   return (
@@ -129,7 +119,7 @@ const RiwayatBantuan = () => {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Cari jenis bantuan atau lokasi..."
+              placeholder="Cari deskripsi atau lokasi..."
               className="w-full pl-9 pr-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder:text-slate-500 outline-none focus:border-emerald-500/50 transition"
             />
           </div>
@@ -160,35 +150,51 @@ const RiwayatBantuan = () => {
             </div>
           )}
 
-          {filtered.map((item) => (
-            <div
-              key={item.id}
-              className="p-4 bg-slate-900 border border-slate-800 rounded-xl space-y-2 hover:border-slate-600 transition group cursor-pointer"
-            >
-              <div className="flex justify-between items-start gap-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold rounded uppercase shrink-0 ${statusStyles[item.status]}`}>
-                    {statusIcons[item.status]}
-                    {item.status}
+          {filtered.map((item) => {
+            const meta = STATUS_META[item.status] || STATUS_META.pending;
+            return (
+              <div
+                key={item._id}
+                className="p-4 bg-slate-900 border border-slate-800 rounded-xl space-y-2 hover:border-slate-600 transition group"
+              >
+                <div className="flex justify-between items-start gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold rounded uppercase shrink-0 ${meta.style}`}>
+                      {meta.icon}
+                      {meta.label}
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-mono">#{String(item._id).slice(-5)}</span>
+                  </div>
+                  <span className="text-[10px] text-slate-500 shrink-0">
+                    {item.createdAt || '-'}
                   </span>
-                  <span className="text-[10px] text-slate-500 font-mono">#{item.id}</span>
                 </div>
-                <span className="text-[10px] text-slate-500 shrink-0">{item.date} · {item.time}</span>
-              </div>
 
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <h4 className="font-bold text-sm text-slate-100">{item.title}</h4>
-                  <p className="text-xs text-slate-400 mt-0.5 flex items-start gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-red-400 shrink-0 mt-0.5" />
-                    <span>{item.location}</span>
-                  </p>
-                  <p className="text-[11px] text-slate-500 mt-1.5 line-clamp-2">"{item.desc}"</p>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <h4 className="font-bold text-sm text-slate-100">
+                      {item.description || 'Sinyal SOS Darurat'}
+                    </h4>
+                    <p className="text-xs text-slate-400 mt-0.5 flex items-start gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-red-400 shrink-0 mt-0.5" />
+                      <span>
+                        {item.latitude?.toFixed(4)}, {item.longitude?.toFixed(4)}
+                      </span>
+                    </p>
+                  </div>
+                  {item.status === 'in_progress' && (
+                    <button
+                      onClick={() => handleResolve(item._id)}
+                      className="shrink-0 flex items-center gap-1.5 px-3 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl font-bold text-xs transition cursor-pointer"
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                      TANDAI SELESAI
+                    </button>
+                  )}
                 </div>
-                <ChevronRight className="w-4 h-4 text-slate-600 shrink-0 mt-1 group-hover:text-emerald-400 transition" />
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

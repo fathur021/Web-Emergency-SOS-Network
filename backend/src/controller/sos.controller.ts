@@ -126,7 +126,8 @@ async function updateSosStatusController(
     req.body,
   );
   const volunteerId = req.user!._id;
-  const sos = await updateSosStatusServices(id, input, volunteerId);
+  const isAdmin = req.user!.role === "admin";
+  const sos = await updateSosStatusServices(id, input, volunteerId, isAdmin);
   const io = req.app.get("io");
   io.emit("sos:update", sos);
   res.status(200).json({

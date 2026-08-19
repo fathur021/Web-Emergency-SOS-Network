@@ -58,13 +58,53 @@ async function updateSosStatusServices(
   id: string | Types.ObjectId,
   input: IUpdateSosStatusInput,
   volunteerId: string | Types.ObjectId | null,
+  isAdmin = false,
 ) {
   const existing = await Sos.findById(id);
   if (!existing) {
     throw new AppError(404, "Sinyal SOS tidak ditemukan");
   }
 
-  // Set volunteerId hanya saat status menuju "in_progress"/"resolved"
+  // ---- 1. Aturan transisi status ----
+  const allowedTransitions: Record<string, string[]> = {
+    pending: ["in_progress"],             // pending hanya bisa diklaim
+    in_progress: ["resolved", "pending"], // lanjut selesai / batalkan
+    resolved: [],                          // sudah selesai = terkunci
+    rejected: [],                          // ditolak admin = terkunci
+  };
+  if (!allowedTransitions[existing.status]?.includes(input.status)) {
+    throw new AppError(
+      400,
+      `Tidak bisa mengubah status dari "${existing.status}" ke "${input.status}"`,
+    );
+  }
+
+  // ---- 2. Status "rejected" khusus admin (batalkan laporan palsu) ----
+  if (input.status === "rejected" && !isAdmin) {
+    throw new AppError(403, "Hanya admin yang bisa menolak/membatalkan SOS");
+  }
+
+  // ---- 3. Dari "in_progress": hanya pemilik yang boleh lanjut ----
+  if (existing.status === "in_progress" && !isAdmin) {
+    const ownerId = existing.volunteerId ? String(existing.volunteerId) : "";
+    if (!ownerId || ownerId !== String(volunteerId)) {
+      throw new AppError(
+        403,
+        "Hanya relawan yang menerima SOS ini yang bisa mengubah statusnya",
+      );
+    }
+  }
+
+  // ---- 4. Anti rebutan saat klaim ----
+  if (
+    input.status === "in_progress" &&
+    existing.volunteerId &&
+    String(existing.volunteerId) !== String(volunteerId)
+  ) {
+    throw new AppError(409, "Sinyal SOS sudah diambil relawan lain");
+  }
+
+  // ---- 5. Set / lepas volunteerId sesuai status ----
   const updateData: {
     status: IUpdateSosStatusInput["status"];
     volunteerId?: Types.ObjectId | null;
@@ -76,8 +116,9 @@ async function updateSosStatusServices(
     }
     updateData.volunteerId = volunteerId as Types.ObjectId;
   } else {
-    updateData.volunteerId = null; // kembali pending/rejected = lepas tanggung jawab
+    updateData.volunteerId = null; // pending/rejected = lepas tanggung jawab
   }
+
   const sos = await Sos.findByIdAndUpdate(id, updateData, { new: true });
   return sos;
 }

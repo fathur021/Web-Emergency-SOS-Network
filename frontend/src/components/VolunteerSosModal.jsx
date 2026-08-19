@@ -1,4 +1,3 @@
-import React from 'react';
 import { Siren, MapPin, Check, X, AlertTriangle } from 'lucide-react';
 
 const VolunteerSosModal = ({ sosData, onAccept, onReject }) => {
