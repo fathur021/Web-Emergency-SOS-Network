@@ -79,9 +79,9 @@ const RiwayatLaporan = () => {
   ];
 
   const statusStyles = {
-    Selesai: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
-    'Dalam Proses': 'bg-amber-500/20 text-amber-400 border border-amber-500/30',
-    Ditolak: 'bg-red-500/20 text-red-400 border border-red-500/30',
+    Selesai: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30',
+    'Dalam Proses': 'bg-amber-500/10 text-amber-400 border border-amber-400/40',
+    Ditolak: 'bg-red-500/20 text-red-400 border border-red-400/30',
     Pending: 'bg-red-500 text-white'
   };
 
@@ -117,12 +117,12 @@ const RiwayatLaporan = () => {
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-lg font-bold text-slate-100">Riwayat Laporan</h2>
-            <p className="text-xs text-slate-400">
+            <h2 className="text-lg font-bold text-stone-900">Riwayat Laporan</h2>
+            <p className="text-xs text-stone-500">
               Daftar laporan SOS yang masuk dari warga beserta status penanganannya.
             </p>
           </div>
-          <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl font-bold text-xs transition cursor-pointer">
+          <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs transition cursor-pointer">
             <Download className="w-4 h-4" />
             EKSPOR LAPORAN
           </button>
@@ -130,19 +130,19 @@ const RiwayatLaporan = () => {
 
         {/* Statistik Ringkas */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="p-3.5 bg-slate-900 border border-slate-800 rounded-xl">
-            <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Total</p>
-            <p className="text-2xl font-bold text-slate-100">{counts.total}</p>
+          <div className="p-3.5 bg-surface border border-stone-200 rounded-xl shadow-neo-sm">
+            <p className="text-[10px] uppercase tracking-wider text-stone-500 font-semibold">Total</p>
+            <p className="text-2xl font-bold text-stone-900">{counts.total}</p>
           </div>
-          <div className="p-3.5 bg-slate-900 border border-emerald-500/30 rounded-xl">
+          <div className="p-3.5 bg-surface border border-emerald-500/30 rounded-xl">
             <p className="text-[10px] uppercase tracking-wider text-emerald-400 font-semibold">Selesai</p>
             <p className="text-2xl font-bold text-emerald-400">{counts.selesai}</p>
           </div>
-          <div className="p-3.5 bg-slate-900 border border-amber-500/30 rounded-xl">
+          <div className="p-3.5 bg-surface border border-amber-400/40 rounded-xl">
             <p className="text-[10px] uppercase tracking-wider text-amber-400 font-semibold">Proses</p>
             <p className="text-2xl font-bold text-amber-400">{counts.proses}</p>
           </div>
-          <div className="p-3.5 bg-slate-900 border border-red-500/30 rounded-xl">
+          <div className="p-3.5 bg-surface border border-red-400/30 rounded-xl">
             <p className="text-[10px] uppercase tracking-wider text-red-400 font-semibold">Ditolak</p>
             <p className="text-2xl font-bold text-red-400">{counts.ditolak}</p>
           </div>
@@ -151,13 +151,13 @@ const RiwayatLaporan = () => {
         {/* Filter & Pencarian */}
         <div className="space-y-3">
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Cari judul, lokasi, pelapor, atau ID laporan..."
-              className="w-full pl-9 pr-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder:text-slate-500 outline-none focus:border-emerald-500/50 transition"
+              className="w-full pl-9 pr-4 py-2.5 bg-surface border border-stone-200 rounded-xl text-xs text-stone-800 placeholder:text-stone-400 outline-none focus:border-blue-500/40 transition"
             />
           </div>
 
@@ -168,8 +168,8 @@ const RiwayatLaporan = () => {
                 onClick={() => setFilter(f)}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-semibold border transition shrink-0 cursor-pointer ${
                   filter === f
-                    ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
-                    : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-600'
+                    ? 'bg-blue-500/10 border-blue-500/40 text-blue-700'
+                    : 'bg-surface border-stone-200 text-stone-500 shadow-neo-sm hover:text-stone-900 hover:border-stone-300'
                 }`}
               >
                 {f}
@@ -181,16 +181,16 @@ const RiwayatLaporan = () => {
         {/* Daftar Laporan */}
         <div className="space-y-3">
           {filtered.length === 0 && (
-            <div className="text-center py-12 bg-slate-900/40 border border-slate-800 rounded-2xl">
-              <p className="text-sm text-slate-400 font-semibold">Tidak ada laporan ditemukan</p>
-              <p className="text-xs text-slate-500 mt-1">Coba ubah filter atau kata kunci pencarian.</p>
+            <div className="text-center py-12 bg-surface/60 border border-stone-200 rounded-2xl shadow-neo-sm">
+              <p className="text-sm text-stone-500 font-semibold">Tidak ada laporan ditemukan</p>
+              <p className="text-xs text-stone-400 mt-1">Coba ubah filter atau kata kunci pencarian.</p>
             </div>
           )}
 
           {filtered.map((item) => (
             <div
               key={item.id}
-              className="p-4 bg-slate-900 border border-slate-800 rounded-xl space-y-2 hover:border-slate-600 transition group cursor-pointer"
+              className="p-4 bg-surface border border-stone-200 rounded-xl shadow-neo-sm space-y-2 hover:border-stone-300 transition group cursor-pointer"
             >
               <div className="flex justify-between items-start gap-2">
                 <div className="flex items-center gap-2 min-w-0">
@@ -198,32 +198,32 @@ const RiwayatLaporan = () => {
                     {statusIcons[item.status]}
                     {item.status}
                   </span>
-                  <span className="text-[10px] text-slate-500 font-mono">#{item.id}</span>
+                  <span className="text-[10px] text-stone-400 font-mono">#{item.id}</span>
                 </div>
-                <span className="text-[10px] text-slate-500 shrink-0">{item.date} · {item.time}</span>
+                <span className="text-[10px] text-stone-400 shrink-0">{item.date} · {item.time}</span>
               </div>
 
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <h4 className="font-bold text-sm text-slate-100">{item.title}</h4>
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[11px] text-slate-400">
+                  <h4 className="font-bold text-sm text-stone-900">{item.title}</h4>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[11px] text-stone-500">
                     <span className="inline-flex items-center gap-1">
                       <MapPin className="w-3.5 h-3.5 text-red-400" />
                       {item.location}
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <User className="w-3.5 h-3.5 text-emerald-500" />
+                      <User className="w-3.5 h-3.5 text-blue-600" />
                       {item.reporter}
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-500 mt-1.5 line-clamp-2">"{item.desc}"</p>
-                  <p className="text-[10px] text-slate-500 mt-1.5">
-                    Kategori: <span className="text-slate-400 font-semibold">{item.category}</span>
-                    <span className="mx-1.5 text-slate-700">|</span>
-                    Ditangani oleh: <span className="text-slate-400 font-semibold">{item.assignedTo}</span>
+                  <p className="text-[11px] text-stone-400 mt-1.5 line-clamp-2">"{item.desc}"</p>
+                  <p className="text-[10px] text-stone-400 mt-1.5">
+                    Kategori: <span className="text-stone-500 font-semibold">{item.category}</span>
+                    <span className="mx-1.5 text-stone-600">|</span>
+                    Ditangani oleh: <span className="text-stone-500 font-semibold">{item.assignedTo}</span>
                   </p>
                 </div>
-                <ChevronRight className="w-4 h-4 text-slate-600 shrink-0 mt-1 group-hover:text-emerald-400 transition" />
+                <ChevronRight className="w-4 h-4 text-stone-500 shrink-0 mt-1 group-hover:text-blue-600 transition" />
               </div>
             </div>
           ))}

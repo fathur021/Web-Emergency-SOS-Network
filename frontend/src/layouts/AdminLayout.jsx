@@ -74,16 +74,42 @@ const AdminLayout = () => {
         ...prev,
       ]);
     };
+    
     socket.on('sos:new', handleNewSos);
     return () => socket.off('sos:new', handleNewSos);
   }, []);
+
+  useEffect(() => {
+  const socket = getSocket();
+  const handleUpdateSos = (sos) => {
+    setIncidents((prev) =>
+      prev.map((item) =>
+        item.id === sos._id
+          ? { ...item, status: statusMap[sos.status] || sos.status }
+          : item,
+      ),
+    );
+  };
+  socket.on('sos:update', handleUpdateSos);
+  return () => socket.off('sos:update', handleUpdateSos);
+}, []);
+
+// 2b. Real-time: SOS dihapus → langsung hilang dari peta & daftar
+useEffect(() => {
+  const socket = getSocket();
+  const handleDeleteSos = ({ id }) => {
+    setIncidents((prev) => prev.filter((item) => item.id !== id));
+  };
+  socket.on('sos:delete', handleDeleteSos);
+  return () => socket.off('sos:delete', handleDeleteSos);
+}, []);
 
   const pendingCount = incidents.filter((i) => i.status === 'Pending').length;
   const inProgressCount = incidents.filter((i) => i.status === 'In Progress').length;
 
 
   return (
-    <div className="flex h-screen bg-slate-950 text-slate-100 font-sans overflow-hidden">
+    <div className="flex h-screen bg-stone-100 text-stone-900 font-sans overflow-hidden">
       {/* 1. SIDEBAR */}
       <AdminSidebar
         isOpen={isSidebarOpen}

@@ -47,6 +47,7 @@ export const sosApi = createApi({
     getAllSos: builder.query({
       query: () => "/sos",
       providesTags: ["Sos"],
+      refetchOnMountOrArgChange: true,
     }),
 
     // GET /api/sos/user — riwayat milik user sendiri

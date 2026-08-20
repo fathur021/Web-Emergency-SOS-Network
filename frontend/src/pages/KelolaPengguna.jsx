@@ -72,14 +72,14 @@ const KelolaPengguna = () => {
   const [users, setUsers] = useState(initialUsers);
 
   const roleStyles = {
-    Warga: 'bg-sky-500/20 text-sky-400 border border-sky-500/30',
-    Relawan: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
-    Admin: 'bg-red-500/20 text-red-400 border border-red-500/30'
+    Warga: 'bg-sky-500/10 text-sky-400 border border-sky-500/30',
+    Relawan: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30',
+    Admin: 'bg-red-500/20 text-red-400 border border-red-400/30'
   };
 
   const statusStyles = {
-    Aktif: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
-    Nonaktif: 'bg-slate-800 text-slate-400 border border-slate-700'
+    Aktif: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30',
+    Nonaktif: 'bg-stone-200 text-stone-500 border border-stone-300'
   };
 
   const filters = ['Semua', 'Warga', 'Relawan', 'Aktif', 'Nonaktif'];
@@ -123,12 +123,12 @@ const KelolaPengguna = () => {
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-lg font-bold text-slate-100">Kelola Pengguna</h2>
-            <p className="text-xs text-slate-400">
+            <h2 className="text-lg font-bold text-stone-900">Kelola Pengguna</h2>
+            <p className="text-xs text-stone-500">
               Kelola akun pengguna, peran, dan status keanggotaan.
             </p>
           </div>
-          <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl font-bold text-xs transition cursor-pointer">
+          <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs transition cursor-pointer">
             <UserPlus className="w-4 h-4" />
             TAMBAH PENGGUNA
           </button>
@@ -136,34 +136,34 @@ const KelolaPengguna = () => {
 
         {/* Statistik Ringkas */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="p-3.5 bg-slate-900 border border-slate-800 rounded-xl">
-            <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Total Pengguna</p>
-            <p className="text-2xl font-bold text-slate-100">{counts.total}</p>
+          <div className="p-3.5 bg-surface border border-stone-200 rounded-xl shadow-neo-sm">
+            <p className="text-[10px] uppercase tracking-wider text-stone-500 font-semibold">Total Pengguna</p>
+            <p className="text-2xl font-bold text-stone-900">{counts.total}</p>
           </div>
-          <div className="p-3.5 bg-slate-900 border border-sky-500/30 rounded-xl">
+          <div className="p-3.5 bg-surface border border-sky-500/30 rounded-xl">
             <p className="text-[10px] uppercase tracking-wider text-sky-400 font-semibold">Warga</p>
             <p className="text-2xl font-bold text-sky-400">{counts.warga}</p>
           </div>
-          <div className="p-3.5 bg-slate-900 border border-emerald-500/30 rounded-xl">
+          <div className="p-3.5 bg-surface border border-emerald-500/30 rounded-xl">
             <p className="text-[10px] uppercase tracking-wider text-emerald-400 font-semibold">Relawan</p>
             <p className="text-2xl font-bold text-emerald-400">{counts.relawan}</p>
           </div>
-          <div className="p-3.5 bg-slate-900 border border-slate-700 rounded-xl">
-            <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Nonaktif</p>
-            <p className="text-2xl font-bold text-slate-300">{counts.nonaktif}</p>
+          <div className="p-3.5 bg-surface border border-stone-300 rounded-xl">
+            <p className="text-[10px] uppercase tracking-wider text-stone-500 font-semibold">Nonaktif</p>
+            <p className="text-2xl font-bold text-stone-600">{counts.nonaktif}</p>
           </div>
         </div>
 
         {/* Pencarian & Filter */}
         <div className="space-y-3">
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Cari nama, email, atau ID pengguna..."
-              className="w-full pl-9 pr-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder:text-slate-500 outline-none focus:border-emerald-500/50 transition"
+              className="w-full pl-9 pr-4 py-2.5 bg-surface border border-stone-200 rounded-xl text-xs text-stone-800 placeholder:text-stone-400 outline-none focus:border-blue-500/40 transition"
             />
           </div>
 
@@ -174,8 +174,8 @@ const KelolaPengguna = () => {
                 onClick={() => setFilter(f)}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-semibold border transition shrink-0 cursor-pointer ${
                   filter === f
-                    ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
-                    : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-600'
+                    ? 'bg-blue-500/10 border-blue-500/40 text-blue-700'
+                    : 'bg-surface border-stone-200 text-stone-500 shadow-neo-sm hover:text-stone-900 hover:border-stone-300'
                 }`}
               >
                 {f}
@@ -187,25 +187,25 @@ const KelolaPengguna = () => {
         {/* Daftar Pengguna */}
         <div className="space-y-3">
           {filtered.length === 0 && (
-            <div className="text-center py-12 bg-slate-900/40 border border-slate-800 rounded-2xl">
-              <p className="text-sm text-slate-400 font-semibold">Tidak ada pengguna ditemukan</p>
-              <p className="text-xs text-slate-500 mt-1">Coba ubah filter atau kata kunci pencarian.</p>
+            <div className="text-center py-12 bg-surface/60 border border-stone-200 rounded-2xl shadow-neo-sm">
+              <p className="text-sm text-stone-500 font-semibold">Tidak ada pengguna ditemukan</p>
+              <p className="text-xs text-stone-400 mt-1">Coba ubah filter atau kata kunci pencarian.</p>
             </div>
           )}
 
           {filtered.map((u) => (
             <div
               key={u.id}
-              className="p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-slate-600 transition"
+              className="p-4 bg-surface border border-stone-200 rounded-xl shadow-neo-sm hover:border-stone-300 transition"
             >
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-sky-600/20 border border-sky-500/40 text-sky-400 font-bold flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-400 font-bold flex items-center justify-center shrink-0">
                   {u.name.charAt(0)}
                 </div>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h4 className="font-bold text-sm text-slate-100">{u.name}</h4>
+                    <h4 className="font-bold text-sm text-stone-900">{u.name}</h4>
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold rounded uppercase ${roleStyles[u.role]}`}>
                       <ShieldCheck className="w-3 h-3" />
                       {u.role}
@@ -216,25 +216,25 @@ const KelolaPengguna = () => {
                     </span>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[11px] text-slate-400">
-                    <span className="font-mono text-slate-500">#{u.id}</span>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[11px] text-stone-500">
+                    <span className="font-mono text-stone-400">#{u.id}</span>
                     <span className="inline-flex items-center gap-1">
-                      <Mail className="w-3 h-3 text-slate-500" />
+                      <Mail className="w-3 h-3 text-stone-400" />
                       {u.email}
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <Phone className="w-3 h-3 text-slate-500" />
+                      <Phone className="w-3 h-3 text-stone-400" />
                       {u.phone}
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <Calendar className="w-3 h-3 text-slate-500" />
+                      <Calendar className="w-3 h-3 text-stone-400" />
                       Bergabung {u.joined}
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-3 mt-2 text-[10px] text-slate-500">
+                  <div className="flex items-center gap-3 mt-2 text-[10px] text-stone-400">
                     <span className="inline-flex items-center gap-1">
-                      <User className="w-3 h-3 text-emerald-500" />
+                      <User className="w-3 h-3 text-blue-600" />
                       {u.reports} laporan dibuat
                     </span>
                   </div>
@@ -246,8 +246,8 @@ const KelolaPengguna = () => {
                     onClick={() => toggleStatus(u.id)}
                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold border transition cursor-pointer ${
                       u.status === 'Nonaktif'
-                        ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/20'
-                        : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
+                        ? 'bg-blue-500/10 border-blue-500/40 text-blue-700 hover:bg-blue-500/20'
+                        : 'bg-stone-200 border-stone-300 text-stone-500 hover:text-stone-900'
                     }`}
                   >
                     <Power className="w-3 h-3" />
@@ -255,12 +255,12 @@ const KelolaPengguna = () => {
                   </button>
                   <button
                     onClick={() => removeUser(u.id)}
-                    className="p-1.5 text-slate-500 hover:text-red-400 rounded-lg hover:bg-red-500/10 transition cursor-pointer"
+                    className="p-1.5 text-stone-400 hover:text-red-400 rounded-lg hover:bg-red-500/10 transition cursor-pointer"
                     title="Hapus pengguna"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
-                  <button className="p-1.5 text-slate-500 hover:text-slate-200 rounded-lg hover:bg-slate-800 transition cursor-pointer">
+                  <button className="p-1.5 text-stone-400 hover:text-stone-900 rounded-lg hover:bg-stone-300 transition cursor-pointer">
                     <MoreVertical className="w-4 h-4" />
                   </button>
                 </div>

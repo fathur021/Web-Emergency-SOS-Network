@@ -167,6 +167,8 @@ async function deleteSosController(
 ) {
   const { id } = req.params;
   const result = await deleteSosServices(id);
+  const io = req.app.get("io");
+  io.emit("sos:delete", { id });
 
   res.status(200).json({
     status: "success",

@@ -106,7 +106,7 @@ const PengaturanRadius = () => {
   if (profileLoading) {
     return (
       <div className="h-full flex items-center justify-center">
-        <p className="text-sm text-slate-400 animate-pulse">
+        <p className="text-sm text-stone-500 animate-pulse">
           Memuat pengaturan...
         </p>
       </div>
@@ -118,26 +118,26 @@ const PengaturanRadius = () => {
       <div className="max-w-2xl mx-auto p-4 md:p-6 space-y-6">
         {/* Header */}
         <div>
-          <h2 className="text-lg font-bold text-slate-100">
+          <h2 className="text-lg font-bold text-stone-900">
             Pengaturan Radius & Lokasi
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-stone-500">
             Atur lokasi posisi Anda dan radius tanggap darurat. SOS dari warga
             dalam radius ini akan muncul di peta Anda.
           </p>
         </div>
 
         {/* Kartu Lokasi Saat Ini */}
-        <div className="p-5 bg-slate-900 border border-slate-800 rounded-2xl space-y-4">
+        <div className="p-5 bg-surface border border-stone-200 rounded-2xl shadow-neo-sm space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-emerald-400" />
+            <h3 className="text-sm font-bold text-stone-900 flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-blue-600" />
               Lokasi Posisi
             </h3>
             <button
               onClick={handleDetectLocation}
               disabled={gpsLoading}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/40 text-emerald-400 rounded-xl text-xs font-semibold hover:bg-emerald-500/20 transition cursor-pointer disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 border border-blue-500/40 text-blue-700 rounded-xl text-xs font-semibold hover:bg-blue-500/20 transition cursor-pointer disabled:opacity-50"
             >
               {gpsLoading ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -150,7 +150,7 @@ const PengaturanRadius = () => {
 
           {/* Input Nama Lokasi */}
           <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+            <label className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">
               Nama Lokasi
             </label>
             <input
@@ -158,14 +158,14 @@ const PengaturanRadius = () => {
               value={locationName}
               onChange={(e) => setLocationName(e.target.value)}
               placeholder="Contoh: Kantor Relawan, Rumah, Posko Utama..."
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition"
+              className="w-full bg-stone-100 border border-stone-200 rounded-xl px-3.5 py-2.5 text-xs text-stone-800 placeholder-stone-400 focus:outline-none focus:border-blue-500 transition"
             />
           </div>
 
           {/* Input Latitude & Longitude */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">
                 Latitude
               </label>
               <input
@@ -174,11 +174,11 @@ const PengaturanRadius = () => {
                 value={latitude}
                 onChange={(e) => setLatitude(e.target.value)}
                 placeholder="-6.2088"
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition font-mono"
+                className="w-full bg-stone-100 border border-stone-200 rounded-xl px-3.5 py-2.5 text-xs text-stone-800 placeholder-stone-400 focus:outline-none focus:border-blue-500 transition font-mono"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">
                 Longitude
               </label>
               <input
@@ -187,20 +187,20 @@ const PengaturanRadius = () => {
                 value={longitude}
                 onChange={(e) => setLongitude(e.target.value)}
                 placeholder="106.8456"
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition font-mono"
+                className="w-full bg-stone-100 border border-stone-200 rounded-xl px-3.5 py-2.5 text-xs text-stone-800 placeholder-stone-400 focus:outline-none focus:border-blue-500 transition font-mono"
               />
             </div>
           </div>
         </div>
 
         {/* Kartu Pengaturan Radius */}
-        <div className="p-5 bg-slate-900 border border-slate-800 rounded-2xl space-y-4">
-          <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
+        <div className="p-5 bg-surface border border-stone-200 rounded-2xl shadow-neo-sm space-y-4">
+          <h3 className="text-sm font-bold text-stone-900 flex items-center gap-2">
             <Ruler className="w-4 h-4 text-amber-400" />
             Radius Tanggap Darurat
           </h3>
 
-          <p className="text-[11px] text-slate-400 leading-relaxed">
+          <p className="text-[11px] text-stone-500 leading-relaxed">
             Tentukan seberapa jauh jangkauan SOS yang ingin Anda pantau. Sinyal
             SOS dari warga dalam radius ini akan muncul di peta radar Anda.
           </p>
@@ -211,7 +211,7 @@ const PengaturanRadius = () => {
               <span className="text-2xl font-bold text-emerald-400">
                 {formatRadius(radius)}
               </span>
-              <span className="text-[10px] text-slate-500 font-mono">
+              <span className="text-[10px] text-stone-400 font-mono">
                 {radius} meter
               </span>
             </div>
@@ -223,10 +223,10 @@ const PengaturanRadius = () => {
               step="500"
               value={radius}
               onChange={(e) => setRadius(Number(e.target.value))}
-              className="w-full h-2 bg-slate-800 rounded-full appearance-none cursor-pointer accent-emerald-500"
+              className="w-full h-2 bg-stone-200 rounded-full appearance-none cursor-pointer accent-blue-600"
             />
 
-            <div className="flex justify-between text-[10px] text-slate-500">
+            <div className="flex justify-between text-[10px] text-stone-400">
               <span>500 m</span>
               <span>25 km</span>
               <span>50 km</span>
@@ -247,8 +247,8 @@ const PengaturanRadius = () => {
                 onClick={() => setRadius(preset.value)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition cursor-pointer ${
                   radius === preset.value
-                    ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-400"
-                    : "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-600"
+                    ? "bg-blue-500/10 border-blue-500/40 text-blue-700"
+                    : "bg-stone-100 border-stone-200 text-stone-500 hover:border-stone-300"
                 }`}
               >
                 {preset.label}
@@ -259,13 +259,13 @@ const PengaturanRadius = () => {
 
         {/* Pesan Sukses / Error */}
         {successMsg && (
-          <div className="flex items-center gap-2 px-4 py-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-xs text-emerald-400 font-semibold">
+          <div className="flex items-center gap-2 px-4 py-3 bg-blue-500/10 border border-blue-500/30 rounded-xl text-xs text-blue-700 font-semibold">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             {successMsg}
           </div>
         )}
         {errorMsg && (
-          <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/30 rounded-xl p-3">
+          <p className="text-xs text-red-400 bg-red-500/10 border border-red-400/30 rounded-xl p-3">
             {errorMsg}
           </p>
         )}
@@ -274,7 +274,7 @@ const PengaturanRadius = () => {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl text-sm flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-50 shadow-lg shadow-emerald-600/20"
+          className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-50 shadow-md shadow-blue-600/20"
         >
           {saving ? (
             <Loader2 className="w-4 h-4 animate-spin" />

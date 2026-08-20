@@ -27,7 +27,7 @@ const AdminSidebar = ({ isOpen, onClose }) => {
   return (
     <>
       <aside 
-        className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-slate-900 border-r border-slate-800 transition-transform duration-300 flex flex-col justify-between p-4 shrink-0 ${
+        className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-surface border-r border-stone-200 transition-transform duration-300 flex flex-col justify-between p-4 shrink-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
@@ -35,16 +35,16 @@ const AdminSidebar = ({ isOpen, onClose }) => {
           {/* Logo & Identity */}
           <div className="flex items-center justify-between px-2">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-500 font-bold">
+              <div className="w-9 h-9 rounded-xl bg-red-500/20 border border-red-400/40 flex items-center justify-center text-red-400 font-bold">
                 <Siren className="w-5 h-5 animate-pulse" />
               </div>
               <div>
-                <h1 className="font-bold text-sm tracking-wide text-slate-100">SOS COMMAND</h1>
-                <p className="text-[10px] text-slate-400">Admin Control Panel</p>
+                <h1 className="font-bold text-sm tracking-wide text-stone-900">SOS COMMAND</h1>
+                <p className="text-[10px] text-stone-500">Admin Control Panel</p>
               </div>
             </div>
             {/* Tombol Close Sidebar (Mobile Only) */}
-            <button onClick={onClose} className="md:hidden text-slate-400">
+            <button onClick={onClose} className="md:hidden text-stone-500">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -57,8 +57,8 @@ const AdminSidebar = ({ isOpen, onClose }) => {
               onClick={onClose}
               className={({ isActive }) => `flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition border ${
                 isActive
-                  ? 'bg-red-500/10 text-red-400 border-red-500/30'
-                  : 'text-slate-400 hover:bg-slate-800 border-transparent'
+                  ? 'bg-blue-500/10 text-blue-700 border-blue-500/30'
+                  : 'text-stone-500 hover:bg-stone-300 border-transparent'
               }`}
             >
               <LayoutDashboard className="w-4 h-4" /> Live Dashboard
@@ -68,8 +68,8 @@ const AdminSidebar = ({ isOpen, onClose }) => {
               onClick={onClose}
               className={({ isActive }) => `flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition border ${
                 isActive
-                  ? 'bg-red-500/10 text-red-400 border-red-500/30'
-                  : 'text-slate-400 hover:bg-slate-800 border-transparent'
+                  ? 'bg-blue-500/10 text-blue-700 border-blue-500/30'
+                  : 'text-stone-500 hover:bg-stone-300 border-transparent'
               }`}
             >
               <Users className="w-4 h-4" /> Kelola Pengguna
@@ -79,8 +79,8 @@ const AdminSidebar = ({ isOpen, onClose }) => {
               onClick={onClose}
               className={({ isActive }) => `flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition border ${
                 isActive
-                  ? 'bg-red-500/10 text-red-400 border-red-500/30'
-                  : 'text-slate-400 hover:bg-slate-800 border-transparent'
+                  ? 'bg-blue-500/10 text-blue-700 border-blue-500/30'
+                  : 'text-stone-500 hover:bg-stone-300 border-transparent'
               }`}
             >
               <ShieldCheck className="w-4 h-4" /> Kelola Relawan
@@ -90,8 +90,8 @@ const AdminSidebar = ({ isOpen, onClose }) => {
               onClick={onClose}
               className={({ isActive }) => `flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition border ${
                 isActive
-                  ? 'bg-red-500/10 text-red-400 border-red-500/30'
-                  : 'text-slate-400 hover:bg-slate-800 border-transparent'
+                  ? 'bg-blue-500/10 text-blue-700 border-blue-500/30'
+                  : 'text-stone-500 hover:bg-stone-300 border-transparent'
               }`}
             >
               <History className="w-4 h-4" /> Riwayat Laporan
@@ -101,12 +101,12 @@ const AdminSidebar = ({ isOpen, onClose }) => {
 
         {/* Info Petugas Admin + Tombol Logout */}
         <div className="space-y-2">
-          <div className="p-3 bg-slate-800/50 rounded-xl border border-slate-800 flex items-center gap-3 text-xs">
+          <div className="p-3 bg-stone-200/60 rounded-xl border border-stone-200 flex items-center gap-3 text-xs">
             <div className="w-8 h-8 rounded-full bg-red-600 text-white font-bold flex items-center justify-center uppercase">
               {user?.nama ? user.nama.charAt(0) : 'A'}
             </div>
             <div className="truncate">
-              <p className="font-semibold text-slate-200 truncate">{user?.nama || 'Admin'}</p>
+              <p className="font-semibold text-stone-800 truncate">{user?.nama || 'Admin'}</p>
               <p className="text-[10px] text-emerald-400">● System Active</p>
             </div>
           </div>
@@ -114,7 +114,7 @@ const AdminSidebar = ({ isOpen, onClose }) => {
           {/* Tombol Keluar */}
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-slate-800/50 rounded-xl border border-slate-800 text-red-400 font-semibold text-xs hover:bg-red-500/10 hover:border-red-500/30 transition"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-stone-200/60 rounded-xl shadow-neo-sm border border-stone-200 text-red-400 font-semibold text-xs hover:bg-red-500/10 hover:border-red-400 transition"
           >
             <LogOut className="w-4 h-4" /> Keluar
           </button>
@@ -125,7 +125,7 @@ const AdminSidebar = ({ isOpen, onClose }) => {
       {isOpen && (
         <div 
           onClick={onClose}
-          className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 md:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
         />
       )}
     </>

@@ -12,7 +12,7 @@ import { useCreateSosMutation } from "../redux/api/sos.Api";
 
 const DEFAULT_COORDS = { latitude: -0.947, longitude: 100.354 };
 
-const SosCard = ({ onCoordsChange }) => {
+const SosCard = ({ onCoordsChange, onSosCreated }) => {
   const [isSosSent, setIsSosSent] = useState(false);
   const [description, setDescription] = useState("");
   const navigate = useNavigate();
@@ -63,7 +63,13 @@ const SosCard = ({ onCoordsChange }) => {
         formData.append("description", description.trim());
       if (imageFile) formData.append("image", imageFile);
 
-      await createSos(formData).unwrap();
+      const response = await createSos(formData).unwrap();
+      onSosCreated?.(response?.data || {
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        description: description.trim(),
+        status: "pending",
+      });
       setIsSosSent(true);
     } catch (error) {
       setError(error?.data?.message || "Gagal mengirim SOS, coba lagi.");
@@ -78,15 +84,15 @@ const SosCard = ({ onCoordsChange }) => {
   };
 
   return (
-    <div className="bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-6 text-center w-full max-w-md">
+    <div className="bg-surface/90 backdrop-blur-xl border border-stone-200 rounded-3xl p-6 shadow-neo space-y-6 text-center w-full max-w-md">
       {!isSosSent ? (
         /* STATE A: SEBELUM TOMBOL SOS DITEKAN */
         <>
           <div>
-            <h1 className="text-xl font-bold text-slate-100">
+            <h1 className="text-xl font-bold text-stone-900">
               Butuh Bantuan Darurat?
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-stone-500 mt-1">
               Tekan tombol di bawah untuk mengirim sinyal SOS ke relawan
               terdekat.
             </p>
@@ -102,7 +108,7 @@ const SosCard = ({ onCoordsChange }) => {
                 onClick={handleSendSOS}
                 disabled={isLoading}
                 className="relative w-32 h-32 rounded-full
-                 bg-gradient-to-br from-red-500 to-red-700 shadow-[0_0_40px_rgba(239,68,68,0.4)] flex flex-col items-center justify-center active:scale-95 transition-all border-4 border-red-400/30 hover:shadow-[0_0_60px_rgba(239,68,68,0.6)] cursor-pointer group"
+                 bg-gradient-to-br from-red-600 to-red-700 shadow-[0_0_40px_rgba(239,68,68,0.4)] flex flex-col items-center justify-center active:scale-95 transition-all border-4 border-red-400/40 hover:shadow-[0_0_60px_rgba(239,68,68,0.6)] cursor-pointer group"
               >
                 {isLoading ? (
                   <Loader2 className="w-9 h-9 text-white animate-spin" />
@@ -121,7 +127,7 @@ const SosCard = ({ onCoordsChange }) => {
           {/* Form Opsional */}
           <div className="space-y-3 pt-2 text-left">
             <div>
-              <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">
+              <label className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider block mb-1">
                 Deskripsi Kejadian (Opsional)
               </label>
               <input
@@ -129,12 +135,12 @@ const SosCard = ({ onCoordsChange }) => {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Contoh: Kecelakaan motor, butuh P3K..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-red-500 transition"
+                className="w-full bg-stone-100 border border-stone-200 rounded-xl px-3.5 py-2 text-xs text-stone-800 placeholder-stone-400 focus:outline-none focus:border-blue-500 transition"
               />
             </div>
 
             <div>
-              <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">
+              <label className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider block mb-1">
                 Upload Foto Lokasi (Opsional)
               </label>
               <input
@@ -146,18 +152,18 @@ const SosCard = ({ onCoordsChange }) => {
               />
               <label
                 htmlFor="photo-input"
-                className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-400 flex items-center justify-between cursor-pointer transition"
+                className="w-full bg-stone-100 border border-stone-200 hover:border-stone-300 rounded-xl px-3.5 py-2 text-xs text-stone-500 flex items-center justify-between cursor-pointer transition"
               >
                 <span className="truncate">
                   {imageFile ? imageFile.name : "Pilih foto kejadian..."}
                 </span>
-                <Camera className="w-4 h-4 text-slate-400" />
+                <Camera className="w-4 h-4 text-stone-500" />
               </label>
             </div>
           </div>
           {/* Pesan error (belum login / gagal kirim) */}
           {error && (
-            <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-left">
+            <p className="text-xs text-red-400 bg-red-500/10 border border-red-400/30 rounded-xl p-3 text-left">
               {error}
             </p>
           )}
@@ -166,15 +172,15 @@ const SosCard = ({ onCoordsChange }) => {
         /* STATE B: SETELAH SOS DITEKAN (STATUS TRACKER) */
         <>
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-400/30 text-red-400 text-xs font-semibold">
               <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>{" "}
               Sinyal Terkirim
             </div>
-            <h2 className="text-lg font-bold text-slate-100">
+            <h2 className="text-lg font-bold text-stone-900">
               Mencari Relawan Terdekat...
             </h2>
              {sentCoords && (
-              <p className="text-[11px] text-slate-500 font-mono">
+              <p className="text-[11px] text-stone-400 font-mono">
                 Lokasi: {sentCoords.latitude.toFixed(6)}, {sentCoords.longitude.toFixed(6)}
               </p>
             )}
@@ -184,7 +190,7 @@ const SosCard = ({ onCoordsChange }) => {
           <div className="py-4 space-y-3 text-left">
             <div className="flex items-center gap-3 text-xs">
               <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-              <span className="text-slate-200 font-medium">
+              <span className="text-stone-800 font-medium">
                 Sinyal diterima sistem
               </span>
             </div>
@@ -199,7 +205,7 @@ const SosCard = ({ onCoordsChange }) => {
           {/* Tombol Batal */}
           <button
             onClick={handleCancelSOS}
-            className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-semibold text-xs transition border border-slate-700 flex items-center justify-center gap-2"
+            className="w-full py-2.5 bg-stone-200 hover:bg-stone-300 text-stone-600 rounded-xl shadow-neo-sm font-semibold text-xs transition border border-stone-300 flex items-center justify-center gap-2"
           >
             <RotateCcw className="w-4 h-4" />
             Batalkan SOS (Salah Tekan)

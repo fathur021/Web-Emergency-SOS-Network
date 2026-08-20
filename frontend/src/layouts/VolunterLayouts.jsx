@@ -74,11 +74,19 @@ const VolunterLayouts = () => {
       }
     };
 
+    // SOS dihapus → hapus dari daftar & tutup modal jika sedang tampil
+    const handleDeleteSos = ({ id }) => {
+      setSosList((prev) => prev.filter((s) => s._id !== id));
+      setIncomingSos((cur) => (cur?.id === id ? null : cur));
+    };
+
     socket.on('sos:new', handleNewSos);
     socket.on('sos:update', handleUpdateSos);
+    socket.on('sos:delete', handleDeleteSos);
     return () => {
       socket.off('sos:new', handleNewSos);
       socket.off('sos:update', handleUpdateSos);
+      socket.off('sos:delete', handleDeleteSos);
     };
   }, [user?.id]);
 
@@ -102,7 +110,7 @@ const VolunterLayouts = () => {
   };
 
   return (
-    <div className="flex h-screen bg-slate-950 text-slate-100 font-sans overflow-hidden">
+    <div className="flex h-screen bg-stone-100 text-stone-900 font-sans overflow-hidden">
 
       {/* 1. SIDEBAR */}
       <VolunteerSideBar

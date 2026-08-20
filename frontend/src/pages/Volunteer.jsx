@@ -1,6 +1,6 @@
-import { useOutletContext } from 'react-router-dom';
-import MapView from '../components/MapContainer';
-import { useGetVolunteersQuery } from '../redux/api/sos.Api';
+import { useOutletContext } from "react-router-dom";
+import MapView from "../components/MapContainer";
+import { useGetVolunteersQuery } from "../redux/api/sos.Api";
 
 const Volunteer = () => {
   const { sosList } = useOutletContext();
@@ -9,7 +9,10 @@ const Volunteer = () => {
   // Ubah data SOS dari backend jadi format markers yang dimengerti MapView:
   // [ { id, lat, lng, title, desc, reporter }, ... ]
   const markers = sosList
-    .filter((s) => s.latitude != null && s.longitude != null)
+    .filter((s) => s.latitude != null &&
+                   s.longitude != null &&
+                  (s.status ==='pending' || s.status === 'in_progress')
+      )
     .map((s) => ({
       id: s._id,
       lat: s.latitude,
