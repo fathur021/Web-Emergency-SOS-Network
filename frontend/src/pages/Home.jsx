@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SosCard from '../components/SosCard';
@@ -84,10 +84,10 @@ const Home = () => {
     <div className="relative w-screen h-screen bg-stone-100 font-sans text-stone-900 overflow-hidden flex items-center justify-center">
       
       {/* 1. NAVBAR */}
-      <Navbar location="Jl. Jendral Sudirman No. 42" />
+      <Navbar />
 
-      {/* 2. PETA (React Leaflet MapView) */}
-      <div className="absolute top-[68px] bottom-0 left-0 right-0" style={{ zIndex: 0 }}>
+      {/* 2. PETA (React Leaflet MapView) — memenuhi layar, navbar melayang di atasnya */}
+      <div className="absolute inset-0" style={{ zIndex: 0 }}>
         <MapView
           latitude={coords.latitude}
           longitude={coords.longitude}

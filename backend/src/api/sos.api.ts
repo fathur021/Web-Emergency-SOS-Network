@@ -45,4 +45,6 @@ router.patch("/:id/data", updateSosDataController);
 // Menghapus sinyal — hanya admin
 router.delete("/:id", requireRole("admin"), deleteSosController);
 
+
+
 export default router;

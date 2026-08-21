@@ -71,6 +71,25 @@ export const sosApi = createApi({
       query: () => "/user/volunteers",
       providesTags: ["Volunteer"],
     }),
+
+    getAllUsers: builder.query({
+      query: () => "/user/all",
+      providesTags: ["User"],
+    }),
+
+    updateUserStatus: builder.mutation({
+      query: ({ id, isVolunteerActive }) => ({
+        url: `/user/${id}/status`,
+        method: "PATCH",
+        body: { isVolunteerActive },
+      }),
+      invalidatesTags: ["User"],
+    }),
+    // DELETE /api/user/:id — admin hapus pengguna
+    deleteUser: builder.mutation({
+      query: (id) => ({ url: `/user/${id}`, method: "DELETE" }),
+      invalidatesTags: ["User", "Sos"], // daftar user & jumlah laporan ikut refresh
+    }),
   }),
 });
 
@@ -82,4 +101,7 @@ export const {
   useGetProfileQuery,
   useUpdateLocationMutation,
   useGetVolunteersQuery,
+  useGetAllUsersQuery,
+  useUpdateUserStatusMutation,
+  useDeleteUserMutation
 } = sosApi;

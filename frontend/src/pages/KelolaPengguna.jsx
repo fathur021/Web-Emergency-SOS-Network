@@ -1,94 +1,80 @@
-import React, { useState } from 'react';
+import { useMemo, useState } from "react";
 import {
   Search,
   UserPlus,
   User,
-  Phone,
+  MapPin,
   ShieldCheck,
   Power,
   Trash2,
   MoreVertical,
   Mail,
-  Calendar
-} from 'lucide-react';
+  Calendar,
+  Loader2,
+  AlertTriangle,
+} from "lucide-react";
+import { useGetAllUsersQuery, useGetAllSosQuery, useUpdateUserStatusMutation,useDeleteUserMutation } from "../redux/api/sos.Api";
+
+const roleLabel = { user: "Warga", volunteer: "Relawan", admin: "Admin" };
+
+const formatTanggal = (iso) => {
+  if (!iso) return "-";
+  return new Date(iso).toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
 
 const KelolaPengguna = () => {
-  const [filter, setFilter] = useState('Semua');
-  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState("Semua");
+  const [search, setSearch] = useState("");
+  const [updateUserStatus] = useUpdateUserStatusMutation();
+  const [deleteUser] = useDeleteUserMutation();
 
-  const initialUsers = [
-    {
-      id: 'USR-104',
-      name: 'Ahmad Fauzi',
-      role: 'Warga',
-      status: 'Aktif',
-      email: 'ahmad.fauzi@gmail.com',
-      phone: '+62 812-3456-7890',
-      reports: 12,
-      joined: '12 Feb 2026'
-    },
-    {
-      id: 'USR-103',
-      name: 'Dewi Lestari',
-      role: 'Warga',
-      status: 'Aktif',
-      email: 'dewi.lestari@gmail.com',
-      phone: '+62 813-9876-5432',
-      reports: 7,
-      joined: '20 Mar 2026'
-    },
-    {
-      id: 'USR-102',
-      name: 'Rudi Hartono',
-      role: 'Relawan',
-      status: 'Aktif',
-      email: 'rudi.hartono@gmail.com',
-      phone: '+62 811-2233-4455',
-      reports: 25,
-      joined: '05 Jan 2026'
-    },
-    {
-      id: 'USR-101',
-      name: 'Siti Nurhaliza',
-      role: 'Warga',
-      status: 'Nonaktif',
-      email: 'siti.nurhaliza@gmail.com',
-      phone: '+62 821-7788-9900',
-      reports: 2,
-      joined: '18 Apr 2026'
-    },
-    {
-      id: 'USR-100',
-      name: 'Andi Wijaya',
-      role: 'Relawan',
-      status: 'Aktif',
-      email: 'andi.wijaya@gmail.com',
-      phone: '+62 822-1122-3344',
-      reports: 9,
-      joined: '30 Des 2025'
-    }
-  ];
+  //ambil data
+  const { data: usersData, isLoading, isError, error } = useGetAllUsersQuery();
+  const { data: sosData } = useGetAllSosQuery();
 
-  const [users, setUsers] = useState(initialUsers);
+  const users = useMemo(() => {
+    if (!usersData?.data) return [];
+    const sosList = sosData?.data || [];
+
+    return usersData.data.map((u) => ({
+      id: u._id,
+      name: u.nama,
+      role: roleLabel[u.role] || u.role,
+      status:
+        u.role === "volunteer"
+          ? u.isVolunteerActive
+            ? "Aktif"
+            : "Nonaktif"
+          : "Aktif",
+      email: u.email,
+      locationName: u.locationName || "",
+      joined: formatTanggal(u.createdAt),
+      reports: sosList.filter(
+        (s) => String(s.userId?._id || s.userId) === String(u._id),
+      ).length,
+    }));
+  }, [usersData, sosData]);
 
   const roleStyles = {
-    Warga: 'bg-sky-500/10 text-sky-400 border border-sky-500/30',
-    Relawan: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30',
-    Admin: 'bg-red-500/20 text-red-400 border border-red-400/30'
+    Warga: "bg-sky-500/10 text-sky-400 border border-sky-500/30",
+    Relawan: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30",
+    Admin: "bg-red-500/20 text-red-400 border border-red-400/30",
   };
 
   const statusStyles = {
-    Aktif: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30',
-    Nonaktif: 'bg-stone-200 text-stone-500 border border-stone-300'
+    Aktif: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30",
+    Nonaktif: "bg-stone-200 text-stone-500 border border-stone-300",
   };
 
-  const filters = ['Semua', 'Warga', 'Relawan', 'Aktif', 'Nonaktif'];
+  const filters = ["Semua", "Warga", "Relawan", "Admin", "Aktif", "Nonaktif"];
 
   const filtered = users.filter((u) => {
     const matchFilter =
-      filter === 'Semua' ||
-      u.role === filter ||
-      u.status === filter;
+      filter === "Semua" || u.role === filter || u.status === filter;
     const matchSearch =
       u.name.toLowerCase().includes(search.toLowerCase()) ||
       u.email.toLowerCase().includes(search.toLowerCase()) ||
@@ -98,24 +84,60 @@ const KelolaPengguna = () => {
 
   const counts = {
     total: users.length,
-    warga: users.filter((u) => u.role === 'Warga').length,
-    relawan: users.filter((u) => u.role === 'Relawan').length,
-    nonaktif: users.filter((u) => u.status === 'Nonaktif').length
+    warga: users.filter((u) => u.role === "Warga").length,
+    relawan: users.filter((u) => u.role === "Relawan").length,
+    admin: users.filter((u) => u.role === "Admin").length,
   };
 
-  const toggleStatus = (id) => {
-    setUsers((prev) =>
-      prev.map((u) =>
-        u.id === id
-          ? { ...u, status: u.status === 'Aktif' ? 'Nonaktif' : 'Aktif' }
-          : u
-      )
+  const toggleStatus = async (u) => {
+    try {
+      await updateUserStatus({
+        id: u.id,
+        isVolunteerActive: u.status === 'Nonaktif',
+      }).unwrap();
+    } catch (error) {
+      alert(error?.data?.message || "Gagal mengubah status relawan");
+    }
+  }
+  const removeUser = async (u) => {
+  if (!window.confirm(`Hapus pengguna "${u.name}"? Semua laporannya juga akan dihapus.`)) return;
+  try {
+    await deleteUser(u.id).unwrap();
+  } catch (error) {
+    alert(error?.data?.message || "Gagal menghapus pengguna");
+  }
+};
+
+  // ===== State: loading =====
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="flex items-center gap-3 text-stone-500">
+          <Loader2 className="w-5 h-5 animate-spin" />
+          <p className="text-sm font-semibold">Memuat data pengguna...</p>
+        </div>
+      </div>
     );
-  };
+  }
 
-  const removeUser = (id) => {
-    setUsers((prev) => prev.filter((u) => u.id !== id));
-  };
+  // ===== State: error =====
+  if (isError) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="max-w-md w-full p-6 bg-surface border border-red-400/30 rounded-2xl shadow-neo-sm text-center">
+          <AlertTriangle className="w-8 h-8 text-red-400 mx-auto mb-2" />
+          <p className="text-sm font-bold text-stone-900">
+            Gagal memuat data pengguna
+          </p>
+          <p className="text-xs text-stone-500 mt-1">
+            {error?.data?.message || error?.error || "Terjadi kesalahan."}
+            <br />
+            Pastikan kamu login sebagai Admin dan backend berjalan.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -123,7 +145,9 @@ const KelolaPengguna = () => {
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-lg font-bold text-stone-900">Kelola Pengguna</h2>
+            <h2 className="text-lg font-bold text-stone-900">
+              Kelola Pengguna
+            </h2>
             <p className="text-xs text-stone-500">
               Kelola akun pengguna, peran, dan status keanggotaan.
             </p>
@@ -137,20 +161,30 @@ const KelolaPengguna = () => {
         {/* Statistik Ringkas */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="p-3.5 bg-surface border border-stone-200 rounded-xl shadow-neo-sm">
-            <p className="text-[10px] uppercase tracking-wider text-stone-500 font-semibold">Total Pengguna</p>
+            <p className="text-[10px] uppercase tracking-wider text-stone-500 font-semibold">
+              Total Pengguna
+            </p>
             <p className="text-2xl font-bold text-stone-900">{counts.total}</p>
           </div>
           <div className="p-3.5 bg-surface border border-sky-500/30 rounded-xl">
-            <p className="text-[10px] uppercase tracking-wider text-sky-400 font-semibold">Warga</p>
+            <p className="text-[10px] uppercase tracking-wider text-sky-400 font-semibold">
+              Warga
+            </p>
             <p className="text-2xl font-bold text-sky-400">{counts.warga}</p>
           </div>
           <div className="p-3.5 bg-surface border border-emerald-500/30 rounded-xl">
-            <p className="text-[10px] uppercase tracking-wider text-emerald-400 font-semibold">Relawan</p>
-            <p className="text-2xl font-bold text-emerald-400">{counts.relawan}</p>
+            <p className="text-[10px] uppercase tracking-wider text-emerald-400 font-semibold">
+              Relawan
+            </p>
+            <p className="text-2xl font-bold text-emerald-400">
+              {counts.relawan}
+            </p>
           </div>
-          <div className="p-3.5 bg-surface border border-stone-300 rounded-xl">
-            <p className="text-[10px] uppercase tracking-wider text-stone-500 font-semibold">Nonaktif</p>
-            <p className="text-2xl font-bold text-stone-600">{counts.nonaktif}</p>
+          <div className="p-3.5 bg-surface border border-red-500/20 rounded-xl">
+            <p className="text-[10px] uppercase tracking-wider text-red-400 font-semibold">
+              Admin
+            </p>
+            <p className="text-2xl font-bold text-red-400">{counts.admin}</p>
           </div>
         </div>
 
@@ -174,8 +208,8 @@ const KelolaPengguna = () => {
                 onClick={() => setFilter(f)}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-semibold border transition shrink-0 cursor-pointer ${
                   filter === f
-                    ? 'bg-blue-500/10 border-blue-500/40 text-blue-700'
-                    : 'bg-surface border-stone-200 text-stone-500 shadow-neo-sm hover:text-stone-900 hover:border-stone-300'
+                    ? "bg-blue-500/10 border-blue-500/40 text-blue-700"
+                    : "bg-surface border-stone-200 text-stone-500 shadow-neo-sm hover:text-stone-900 hover:border-stone-300"
                 }`}
               >
                 {f}
@@ -188,8 +222,12 @@ const KelolaPengguna = () => {
         <div className="space-y-3">
           {filtered.length === 0 && (
             <div className="text-center py-12 bg-surface/60 border border-stone-200 rounded-2xl shadow-neo-sm">
-              <p className="text-sm text-stone-500 font-semibold">Tidak ada pengguna ditemukan</p>
-              <p className="text-xs text-stone-400 mt-1">Coba ubah filter atau kata kunci pencarian.</p>
+              <p className="text-sm text-stone-500 font-semibold">
+                Tidak ada pengguna ditemukan
+              </p>
+              <p className="text-xs text-stone-400 mt-1">
+                Coba ubah filter atau kata kunci pencarian.
+              </p>
             </div>
           )}
 
@@ -205,12 +243,18 @@ const KelolaPengguna = () => {
 
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h4 className="font-bold text-sm text-stone-900">{u.name}</h4>
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold rounded uppercase ${roleStyles[u.role]}`}>
+                    <h4 className="font-bold text-sm text-stone-900">
+                      {u.name}
+                    </h4>
+                    <span
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold rounded uppercase ${roleStyles[u.role]}`}
+                    >
                       <ShieldCheck className="w-3 h-3" />
                       {u.role}
                     </span>
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold rounded uppercase ${statusStyles[u.status]}`}>
+                    <span
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold rounded uppercase ${statusStyles[u.status]}`}
+                    >
                       <Power className="w-3 h-3" />
                       {u.status}
                     </span>
@@ -223,8 +267,8 @@ const KelolaPengguna = () => {
                       {u.email}
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <Phone className="w-3 h-3 text-stone-400" />
-                      {u.phone}
+                      <MapPin className="w-3 h-3 text-stone-400" />
+                      {u.locationName || "Lokasi belum diatur"}
                     </span>
                     <span className="inline-flex items-center gap-1">
                       <Calendar className="w-3 h-3 text-stone-400" />
@@ -242,19 +286,21 @@ const KelolaPengguna = () => {
 
                 {/* Aksi */}
                 <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 shrink-0">
+                  {u.role === "Relawan" && (
+  <button
+    onClick={() => toggleStatus(u)}   // ← kirim objek u, bukan u.id
+    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold border transition cursor-pointer ${
+      u.status === "Nonaktif"
+        ? "bg-blue-500/10 border-blue-500/40 text-blue-700 hover:bg-blue-500/20"
+        : "bg-stone-200 border-stone-300 text-stone-500 hover:text-stone-900"
+    }`}
+  >
+    <Power className="w-3 h-3" />
+    {u.status === "Nonaktif" ? "AKTIFKAN" : "NONAKTIFKAN"}
+  </button>
+)}
                   <button
-                    onClick={() => toggleStatus(u.id)}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold border transition cursor-pointer ${
-                      u.status === 'Nonaktif'
-                        ? 'bg-blue-500/10 border-blue-500/40 text-blue-700 hover:bg-blue-500/20'
-                        : 'bg-stone-200 border-stone-300 text-stone-500 hover:text-stone-900'
-                    }`}
-                  >
-                    <Power className="w-3 h-3" />
-                    {u.status === 'Nonaktif' ? 'AKTIFKAN' : 'NONAKTIFKAN'}
-                  </button>
-                  <button
-                    onClick={() => removeUser(u.id)}
+                    onClick={() => removeUser(u)}
                     className="p-1.5 text-stone-400 hover:text-red-400 rounded-lg hover:bg-red-500/10 transition cursor-pointer"
                     title="Hapus pengguna"
                   >

@@ -1,15 +1,22 @@
-import React from 'react';
 import { Siren, MapPin, ShieldCheck, LogIn, UserPlus, LogOut } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../redux/authSlice';
+import { useGetProfileQuery } from '../redux/api/sos.Api';
 
-const Navbar = ({ location = "Jl. Sudirman, No. 42" }) => {
+const Navbar = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   // Baca data user dari Redux (null kalau belum login)
   const user = useSelector((state) => state.auth.user);
+
+  // Lokasi asli dari profil user (skip kalau belum login)
+  const hasToken = Boolean(localStorage.getItem('token'));
+  const { data: profileData } = useGetProfileQuery(undefined, {
+    skip: !hasToken,
+  });
+  const locationName = profileData?.data?.locationName;
 
   const handleLogout = () => {
     dispatch(logout());      // hapus token & user dari store + localStorage
@@ -17,7 +24,8 @@ const Navbar = ({ location = "Jl. Sudirman, No. 42" }) => {
   };
 
   return (
-    <header className="absolute top-0 left-0 right-0 p-4 md:p-6 flex justify-between items-center z-30 backdrop-blur-sm bg-surface/60 border-b border-stone-200/60">
+    <header className="absolute top-3 left-3 right-3 md:top-4 md:left-5 md:right-5 z-30">
+      <div className="flex justify-between items-center gap-3 px-4 py-3 rounded-2xl backdrop-blur-md bg-surface/75 border border-stone-200/80 shadow-neo">
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-xl bg-red-500/20 border border-red-400/40 flex items-center justify-center text-red-400 font-bold">
           <Siren className="w-5 h-5 text-red-400 animate-pulse" />
@@ -27,20 +35,22 @@ const Navbar = ({ location = "Jl. Sudirman, No. 42" }) => {
         </span>
       </div>
 
-      {/* Indikator GPS */}
-      <div className="hidden md:flex items-center gap-2 bg-surface/80 px-3.5 py-1.5 rounded-full border border-stone-200 text-xs">
-        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span className="text-stone-600 flex items-center gap-1">
-          <MapPin className="w-3.5 h-3.5 text-blue-600 inline" />
-          Lokasi: <strong className="text-stone-900 font-medium">{location}</strong>
-        </span>
-      </div>
+      {/* Indikator GPS — hanya tampil kalau user sudah mengatur lokasi */}
+      {locationName && (
+        <div className="hidden md:flex items-center gap-2 bg-surface px-3.5 py-1.5 rounded-full border border-stone-200 text-xs">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span className="text-stone-600 flex items-center gap-1">
+            <MapPin className="w-3.5 h-3.5 text-blue-600 inline" />
+            Lokasi: <strong className="text-stone-900 font-medium">{locationName}</strong>
+          </span>
+        </div>
+      )}
 
       {/* Bagian kanan: berubah tergantung status login */}
       {user ? (
         <div className="flex items-center gap-2">
           {/* Info user yang sedang login */}
-          <div className="flex items-center gap-2 bg-surface/80 px-3.5 py-1.5 rounded-full border border-stone-200">
+          <div className="flex items-center gap-2 bg-surface px-3.5 py-1.5 rounded-full border border-stone-200">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             <div className="text-right leading-tight">
               <p className="text-xs font-semibold text-stone-900">{user.nama}</p>
@@ -86,6 +96,7 @@ const Navbar = ({ location = "Jl. Sudirman, No. 42" }) => {
           </Link>
         </div>
       )}
+      </div>
     </header>
   );
 };

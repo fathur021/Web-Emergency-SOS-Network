@@ -4,7 +4,6 @@ import Volunteer from './pages/Volunteer.jsx'
 import RiwayatBantuan from './pages/RiwayatBantuan.jsx'
 import PengaturanRadius from './pages/PengaturanRadius.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx'
-import KelolaRelawan from './pages/KelolaRelawan.jsx'
 import RiwayatLaporan from './pages/RiwayatLaporan.jsx'
 import KelolaPengguna from './pages/KelolaPengguna.jsx'
 import Register from './pages/Register.jsx'
@@ -36,7 +35,6 @@ const App = () => {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="pengguna" element={<KelolaPengguna />} />
-            <Route path="relawan" element={<KelolaRelawan />} />
             <Route path="riwayat-laporan" element={<RiwayatLaporan />} />
           </Route>
         </Route>

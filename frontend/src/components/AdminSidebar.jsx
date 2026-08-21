@@ -5,7 +5,6 @@ import { logout } from '../redux/authSlice';
 import { 
   LayoutDashboard, 
   Users, 
-  ShieldCheck, 
   History, 
   Siren, 
   X,
@@ -73,17 +72,6 @@ const AdminSidebar = ({ isOpen, onClose }) => {
               }`}
             >
               <Users className="w-4 h-4" /> Kelola Pengguna
-            </NavLink>
-            <NavLink
-              to="/admin/relawan"
-              onClick={onClose}
-              className={({ isActive }) => `flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition border ${
-                isActive
-                  ? 'bg-blue-500/10 text-blue-700 border-blue-500/30'
-                  : 'text-stone-500 hover:bg-stone-300 border-transparent'
-              }`}
-            >
-              <ShieldCheck className="w-4 h-4" /> Kelola Relawan
             </NavLink>
             <NavLink
               to="/admin/riwayat-laporan"
