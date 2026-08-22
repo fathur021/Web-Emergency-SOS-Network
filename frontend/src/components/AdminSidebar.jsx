@@ -1,7 +1,7 @@
-import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../redux/authSlice';
+import { konfirmasiLogout } from '../utils/alert';
 import { 
   LayoutDashboard, 
   Users, 
@@ -18,7 +18,9 @@ const AdminSidebar = ({ isOpen, onClose }) => {
   // Ambil data admin yang sedang login dari Redux
   const user = useSelector((state) => state.auth.user);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const result = await konfirmasiLogout();
+    if(!result.isConfirmed) return;
     dispatch(logout());      // hapus token & user dari store + localStorage
     navigate('/login');      // kembali ke halaman login
   };

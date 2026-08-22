@@ -1,8 +1,8 @@
-import React from 'react';
 import { Menu, Bell, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../redux/authSlice';
+import { konfirmasiLogout } from '../utils/alert';
 
 const AdminTopBar = ({ onOpenSidebar, pendingCount = 1, inProgressCount = 1, volunteersCount = 14 }) => {
   const navigate = useNavigate();
@@ -11,7 +11,9 @@ const AdminTopBar = ({ onOpenSidebar, pendingCount = 1, inProgressCount = 1, vol
   // Ambil data admin yang sedang login dari Redux
   const user = useSelector((state) => state.auth.user);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const result = await konfirmasiLogout();
+    if(!result.isConfirmed) return
     dispatch(logout());      // hapus token & user dari store + localStorage
     navigate('/login');      // kembali ke halaman login
   };

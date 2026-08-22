@@ -3,6 +3,7 @@ import { Menu, Power, LogOut, Bell, Check, X, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../redux/authSlice';
+import { konfirmasiLogout } from '../utils/alert';
 import {
   useGetAllSosQuery,
   useUpdateSosStatusMutation,
@@ -46,7 +47,9 @@ const VolunteerTopBar = ({ isOnline, setIsOnline, onOpenSidebar }) => {
   // BATALKAN → lepas tanggung jawab, SOS kembali pending
   const handleCancel = (id) => runStatus(id, 'pending');
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const result = await konfirmasiLogout();
+    if (!result.isConfirmed) return;
     dispatch(logout());
     navigate('/login');
   };

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../redux/authSlice';
 import { useGetProfileQuery } from '../redux/api/sos.Api';
+import { konfirmasiLogout } from '../utils/alert';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -18,7 +19,9 @@ const Navbar = () => {
   });
   const locationName = profileData?.data?.locationName;
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const result = await konfirmasiLogout();
+    if (!result.isConfirmed) return;
     dispatch(logout());      // hapus token & user dari store + localStorage
     navigate('/login');      // kembali ke halaman login
   };

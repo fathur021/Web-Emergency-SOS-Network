@@ -13,7 +13,8 @@ import {
   Loader2,
   AlertTriangle,
 } from "lucide-react";
-import { useGetAllUsersQuery, useGetAllSosQuery, useUpdateUserStatusMutation,useDeleteUserMutation } from "../redux/api/sos.Api";
+import { useGetAllUsersQuery, useGetAllSosQuery, useUpdateUserStatusMutation, useDeleteUserMutation } from "../redux/api/sos.Api";
+import { konfirmasiHapus, popupSukses, popupGagal } from "../utils/alert";
 
 const roleLabel = { user: "Warga", volunteer: "Relawan", admin: "Admin" };
 
@@ -100,13 +101,15 @@ const KelolaPengguna = () => {
     }
   }
   const removeUser = async (u) => {
-  if (!window.confirm(`Hapus pengguna "${u.name}"? Semua laporannya juga akan dihapus.`)) return;
-  try {
-    await deleteUser(u.id).unwrap();
-  } catch (error) {
-    alert(error?.data?.message || "Gagal menghapus pengguna");
-  }
-};
+    const hasil = await konfirmasiHapus(u.name);
+    if (!hasil.isConfirmed) return;
+    try {
+      await deleteUser(u.id).unwrap();
+      popupSukses(`Pengguna "${u.name}" berhasil dihapus`);
+    } catch (error) {
+      popupGagal(error?.data?.message || "Gagal menghapus pengguna");
+    }
+  };
 
   // ===== State: loading =====
   if (isLoading) {
