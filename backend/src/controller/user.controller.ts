@@ -5,8 +5,13 @@ import {
   updateLocationService,
   getVolunteersService,
   updateUserStatusServices,
-  deleteUserServices
+  deleteUserServices,
+  updateUserAdminService,
+  createUserService
 } from "../services/user.services.js";
+import { createUserSchema, updateUserSchema, validateWith } from "../validation/auth.validation.js";
+import type { ICreateUserInput, IUpdateUserInput } from "../interface/user.interface.js";
+
 
 async function getProfileController(req: Request, res: Response) {
   const userId = req.user!._id.toString(); // Use the authenticated user's ID
@@ -95,11 +100,46 @@ async function deleteUserController(
     message: result.message,
   });
 }
+
+// ---- POST /api/user ----
+// Admin membuat akun baru lengkap dengan rolenya.
+async function createUserController(req: Request, res: Response) {
+  // Gagal validasi -> validateWith melempar AppError 400 otomatis
+  const input = await validateWith<ICreateUserInput>(createUserSchema, req.body);
+
+  const user = await createUserService(input);
+
+  // 201 = Created (pola sama seperti registerController)
+  return res.status(201).json({
+    status: "success",
+    message: "Pengguna berhasil ditambahkan",
+    data: user,
+  });
+}
+
+// ---- PATCH /api/user/:id ----
+// Admin mengubah sebagian data pengguna (nama/email/role/password).
+async function updateUserController(req: Request<{ id: string }>, res: Response) {
+  const { id } = req.params;
+
+  // Gagal validasi -> validateWith melempar AppError 400 otomatis
+  const input = await validateWith<IUpdateUserInput>(updateUserSchema, req.body);
+
+  const user = await updateUserAdminService(id, input);
+
+  return res.status(200).json({
+    status: "success",
+    message: "Data pengguna berhasil diperbarui",
+    data: user,
+  });
+}
 export {
   getProfileController,
   getAllUsersController,
   updateLocationController,
   getVolunteersController,
   updateUserStatusController,
-  deleteUserController
+  deleteUserController,
+  createUserController,
+  updateUserController
 };

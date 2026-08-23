@@ -1,6 +1,12 @@
 import { User } from "../model/user.model.js";
 import { AppError } from "../error/app.error.js";
 import { Sos } from "../model/sos.model.js";
+import bcrypt from "bcryptjs";
+import type {
+  ICreateUserInput,
+  IUpdateUserInput,
+} from "../interface/user.interface.js";
+
 async function getUserByIdService(userId: string) {
   const user = await User.findById(userId).select("-password"); // Exclude password field
   if (!user) {
@@ -87,11 +93,73 @@ async function deleteUserServices(userId: string) {
   await User.findByIdAndDelete(userId);
   return { message: "Pengguna berhasil dihapus" };
 }
+
+async function createUserService(input: ICreateUserInput) {
+  const existing = await User.findOne({ email: input.email });
+  if (existing) {
+    throw new AppError(409, "Email sudah terdaftar"); // 409 = Conflict
+  }
+  const hashedPassword = await bcrypt.hash(input.password, 10);
+  const user = await User.create({
+    nama: input.nama,
+    email: input.email,
+    password: hashedPassword,
+    role: input.role,
+    isVolunteerActive: input.role === "volunteer",
+  });
+  const safeUser = await User.findById(user._id).select("-password");
+  return safeUser;
+}
+
+async function updateUserAdminService(userId: string, input: IUpdateUserInput) {
+  // 1. Pastikan user ada & bukan admin
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AppError(404, "Pengguna tidak ditemukan");
+  }
+  if (user.role === "admin") {
+    throw new AppError(403, "Akun admin tidak bisa diedit"); // sama seperti aturan hapus
+  }
+
+  // 2. Kalau email diganti, pastikan tidak dipakai orang lain (kecuali dirinya sendiri)
+  if (input.email && input.email !== user.email) {
+    const dup = await User.findOne({ email: input.email });
+    if (dup) {
+      throw new AppError(409, "Email sudah terdaftar");
+    }
+  }
+
+  // 3. Hash password HANYA kalau field password benar-benar diisi
+  let hashedPassword: string | undefined;
+  if (input.password) {
+    hashedPassword = await bcrypt.hash(input.password, 10);
+  }
+
+  // 4. Kumpulkan field yang mau di-update ke satu objek
+  const updateData: Record<string, unknown> = {};
+  if (input.nama) updateData.nama = input.nama;
+  if (input.email) updateData.email = input.email;
+  if (input.role) updateData.role = input.role;
+  if (hashedPassword) updateData.password = hashedPassword;
+
+  // 5. Sinkronkan status relawan dengan role terbaru:
+  //    jadi relawan -> aktif, bukan lagi relawan -> matikan
+  updateData.isVolunteerActive =
+    input.role === undefined ? user.isVolunteerActive : input.role === "volunteer";
+
+  // 6. Simpan & kembalikan versi TANPA password
+  const updated = await User.findByIdAndUpdate(userId, updateData, { new: true }).select(
+    "-password",
+  );
+  return updated;
+}
 export {
   getUserByIdService,
   getAllUsersService,
   updateLocationService,
   getVolunteersService,
   updateUserStatusServices,
-  deleteUserServices
+  deleteUserServices,
+  createUserService,
+  updateUserAdminService
 };

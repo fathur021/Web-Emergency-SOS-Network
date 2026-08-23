@@ -7,11 +7,12 @@
 // createApi   : fungsi untuk mendefinisikan kumpulan endpoint API
 // fetchBaseQuery : fungsi bawaan yang menjalankan request fetch (HTTP)
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { API_BASE_URL } from '../../config/api';
 
 // ---- 1. Base URL backend ----
 // Backend Express kamu berjalan di port 5000, semua route di-prefix "/api"
 // (lihat backend/src/app.ts -> app.use("/api/", api)).
-const BASE_URL = 'http://localhost:5000/api';
+const BASE_URL = API_BASE_URL;
 
 // ---- 2. Base query (konfigurasi fetch global) ----
 // Semua request di file ini memakai baseUrl yang sama.

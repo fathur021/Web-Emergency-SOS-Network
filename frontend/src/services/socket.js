@@ -1,5 +1,7 @@
 import { io } from "socket.io-client";
-const SOCKET = "http://localhost:5000";
+import { API_ORIGIN } from "../config/api";
+
+const SOCKET = API_ORIGIN;
 
 let socket = null;
 

@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { API_BASE_URL } from "../../config/api";
 
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = API_BASE_URL;
 
 const baseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
@@ -90,6 +91,26 @@ export const sosApi = createApi({
       query: (id) => ({ url: `/user/${id}`, method: "DELETE" }),
       invalidatesTags: ["User", "Sos"], // daftar user & jumlah laporan ikut refresh
     }),
+
+    createUser: builder.mutation({
+      query: (body) => ({
+        url: "/user",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["User"],
+    }),
+
+    // PATCH /api/user/:id — admin mengubah data pengguna
+    updateUser: builder.mutation({
+      // ({ id, ...body }) = pisahkan id untuk URL, sisanya masuk body
+      query: ({ id, ...body }) => ({
+        url: `/user/${id}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["User"],
+    }),
   }),
 });
 
@@ -103,5 +124,7 @@ export const {
   useGetVolunteersQuery,
   useGetAllUsersQuery,
   useUpdateUserStatusMutation,
-  useDeleteUserMutation
+  useDeleteUserMutation,
+  useCreateUserMutation,
+  useUpdateUserMutation
 } = sosApi;

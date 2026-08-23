@@ -47,6 +47,16 @@ io.on("connection", (socket) => {
   });
 });
 
+server.on("error", (error: NodeJS.ErrnoException) => {
+  if (error.code === "EADDRINUSE") {
+    console.error(
+      `Port ${port} sedang dipakai. Matikan proses lama atau jalankan dengan PORT lain.`,
+    );
+    process.exit(1);
+  }
+  throw error;
+});
+
 server.listen(port, () => {
   /* eslint-disable no-console */
   console.log(`Listening: http://localhost:${port}`);

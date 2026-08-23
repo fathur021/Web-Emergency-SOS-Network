@@ -8,14 +8,20 @@ import {
   Power,
   Trash2,
   MoreVertical,
+  Pencil,
   Mail,
   Calendar,
   Loader2,
   AlertTriangle,
 } from "lucide-react";
-import { useGetAllUsersQuery, useGetAllSosQuery, useUpdateUserStatusMutation, useDeleteUserMutation } from "../redux/api/sos.Api";
+import {
+  useGetAllUsersQuery,
+  useGetAllSosQuery,
+  useUpdateUserStatusMutation,
+  useDeleteUserMutation,
+} from "../redux/api/sos.Api";
 import { konfirmasiHapus, popupSukses, popupGagal } from "../utils/alert";
-
+import FormPenggunaModal from "../components/FormPenggunaModal";
 const roleLabel = { user: "Warga", volunteer: "Relawan", admin: "Admin" };
 
 const formatTanggal = (iso) => {
@@ -32,6 +38,18 @@ const KelolaPengguna = () => {
   const [search, setSearch] = useState("");
   const [updateUserStatus] = useUpdateUserStatusMutation();
   const [deleteUser] = useDeleteUserMutation();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  // null = mode tambah; objek user = mode edit
+  const [editingUser, setEditingUser] = useState(null);
+
+  const bukaModalTambah = () => {
+    setEditingUser(null);
+    setIsModalOpen(true);
+  };
+  const bukaModalEdit = (u) => {
+    setEditingUser(u);
+    setIsModalOpen(true);
+  };
 
   //ambil data
   const { data: usersData, isLoading, isError, error } = useGetAllUsersQuery();
@@ -45,6 +63,7 @@ const KelolaPengguna = () => {
       id: u._id,
       name: u.nama,
       role: roleLabel[u.role] || u.role,
+      roleValue: u.role, // nilai mentah (user/volunteer/admin) untuk form edit
       status:
         u.role === "volunteer"
           ? u.isVolunteerActive
@@ -94,12 +113,12 @@ const KelolaPengguna = () => {
     try {
       await updateUserStatus({
         id: u.id,
-        isVolunteerActive: u.status === 'Nonaktif',
+        isVolunteerActive: u.status === "Nonaktif",
       }).unwrap();
     } catch (error) {
       alert(error?.data?.message || "Gagal mengubah status relawan");
     }
-  }
+  };
   const removeUser = async (u) => {
     const hasil = await konfirmasiHapus(u.name);
     if (!hasil.isConfirmed) return;
@@ -155,7 +174,10 @@ const KelolaPengguna = () => {
               Kelola akun pengguna, peran, dan status keanggotaan.
             </p>
           </div>
-          <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs transition cursor-pointer">
+          <button
+            onClick={bukaModalTambah}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs transition cursor-pointer"
+          >
             <UserPlus className="w-4 h-4" />
             TAMBAH PENGGUNA
           </button>
@@ -290,18 +312,27 @@ const KelolaPengguna = () => {
                 {/* Aksi */}
                 <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 shrink-0">
                   {u.role === "Relawan" && (
-  <button
-    onClick={() => toggleStatus(u)}   // ← kirim objek u, bukan u.id
-    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold border transition cursor-pointer ${
-      u.status === "Nonaktif"
-        ? "bg-blue-500/10 border-blue-500/40 text-blue-700 hover:bg-blue-500/20"
-        : "bg-stone-200 border-stone-300 text-stone-500 hover:text-stone-900"
-    }`}
-  >
-    <Power className="w-3 h-3" />
-    {u.status === "Nonaktif" ? "AKTIFKAN" : "NONAKTIFKAN"}
-  </button>
-)}
+                    <button
+                      onClick={() => toggleStatus(u)} // ← kirim objek u, bukan u.id
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold border transition cursor-pointer ${
+                        u.status === "Nonaktif"
+                          ? "bg-blue-500/10 border-blue-500/40 text-blue-700 hover:bg-blue-500/20"
+                          : "bg-stone-200 border-stone-300 text-stone-500 hover:text-stone-900"
+                      }`}
+                    >
+                      <Power className="w-3 h-3" />
+                      {u.status === "Nonaktif" ? "AKTIFKAN" : "NONAKTIFKAN"}
+                    </button>
+                  )}
+                  {u.role !== "Admin" && (
+                    <button
+                      onClick={() => bukaModalEdit(u)}
+                      className="p-1.5 text-stone-400 hover:text-blue-600 rounded-lg hover:bg-blue-500/10 transition cursor-pointer"
+                      title="Edit pengguna"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                  )}
                   <button
                     onClick={() => removeUser(u)}
                     className="p-1.5 text-stone-400 hover:text-red-400 rounded-lg hover:bg-red-500/10 transition cursor-pointer"
@@ -318,6 +349,11 @@ const KelolaPengguna = () => {
           ))}
         </div>
       </div>
+      <FormPenggunaModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        initialData={editingUser}
+      />
     </div>
   );
 };

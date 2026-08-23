@@ -7,6 +7,7 @@
 // ================================================================
 
 import { createSlice } from '@reduxjs/toolkit';
+import { disconnectSocket } from '../services/socket';
 
 // ---- Initial state: baca dari localStorage ----
 // Kalau user sudah pernah login, saat refresh browser
@@ -41,6 +42,7 @@ const authSlice = createSlice({
       // Hapus dari localStorage
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+      disconnectSocket();
     },
   },
 });

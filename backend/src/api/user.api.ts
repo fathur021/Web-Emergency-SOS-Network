@@ -5,7 +5,9 @@ import {
   updateLocationController,
   getVolunteersController,
   updateUserStatusController,
-  deleteUserController
+  deleteUserController,
+  createUserController,
+  updateUserController
 } from "../controller/user.controller.js";
 import { authenticate, requireRole } from "../middleware/auth.middleware.js";
 
@@ -19,6 +21,8 @@ router.patch("/location", updateLocationController);
 router.get("/all", requireRole("admin"), getAllUsersController);
 router.patch("/:id/status", requireRole("admin"), updateUserStatusController);
 router.delete("/:id", requireRole("admin"), deleteUserController);
+router.post("/", requireRole("admin"), createUserController);
+router.patch("/:id", requireRole("admin"), updateUserController);
 export default router;
 
 

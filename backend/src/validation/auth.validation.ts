@@ -66,4 +66,68 @@ async function validateWith<T>(schema: Joi.ObjectSchema<T>, data: unknown): Prom
   }
 }
 
+export const createUserSchema = Joi.object({
+  nama: Joi.string()
+    .trim()
+    .min(3)
+    .required()
+    .messages({
+      "string.empty": "Nama harus diisi",
+      "string.min": "Nama minimal 3 karakter",
+      "any.required": "Nama harus diisi",
+    }),
+
+  email: Joi.string()
+    .email()
+    .required()
+    .messages({
+      "string.empty": "Email harus diisi",
+      "string.email": "Format email tidak valid",
+      "any.required": "Email harus diisi",
+    }),
+
+  password: Joi.string()
+    .min(6)
+    .required()
+    .messages({
+      "string.empty": "Password harus diisi",
+      "string.min": "Password minimal 6 karakter",
+      "any.required": "Password harus diisi",
+    }),
+
+  role: Joi.string()
+    .valid("user", "volunteer", "admin")
+    .required()
+    .messages({
+      "any.only": "Role harus user, volunteer, atau admin",
+      "any.required": "Role harus dipilih",
+    }),
+});
+
+// Semua field OPSIONAL, tapi minimal satu harus diisi (.min(1)).
+// password boleh string kosong -> service akan mengabaikannya.
+export const updateUserSchema = Joi.object({
+  nama: Joi.string().trim().min(3).messages({
+    "string.min": "Nama minimal 3 karakter",
+  }),
+
+  email: Joi.string().email().messages({
+    "string.email": "Format email tidak valid",
+  }),
+
+  role: Joi.string()
+    .valid("user", "volunteer", "admin")
+    .messages({
+      "any.only": "Role harus user, volunteer, atau admin",
+    }),
+
+  password: Joi.string().min(6).allow("").messages({
+    "string.min": "Password minimal 6 karakter",
+  }),
+})
+  .min(1)
+  .messages({
+    "object.min": "Tidak ada data yang diubah",
+  });
+
 export { validateWith };
