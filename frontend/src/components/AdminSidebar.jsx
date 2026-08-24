@@ -1,121 +1,100 @@
-import { NavLink, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '../redux/authSlice';
-import { konfirmasiLogout } from '../utils/alert';
-import { 
-  LayoutDashboard, 
-  Users, 
-  History, 
-  Siren, 
+import { NavLink } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import {
+  LayoutDashboard,
+  Users,
+  History,
+  Siren,
   X,
-  LogOut
 } from 'lucide-react';
 
-const AdminSidebar = ({ isOpen, onClose }) => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
+const navItems = [
+  { to: '/admin', end: true, icon: LayoutDashboard, label: 'Live Dashboard' },
+  { to: '/admin/pengguna', icon: Users, label: 'Kelola Pengguna' },
+  { to: '/admin/riwayat-laporan', icon: History, label: 'Riwayat Laporan' },
+];
 
+const AdminSidebar = ({ isOpen, onClose }) => {
   // Ambil data admin yang sedang login dari Redux
   const user = useSelector((state) => state.auth.user);
 
-  const handleLogout = async () => {
-    const result = await konfirmasiLogout();
-    if(!result.isConfirmed) return;
-    dispatch(logout());      // hapus token & user dari store + localStorage
-    navigate('/login');      // kembali ke halaman login
-  };
-
   return (
     <>
-      <aside 
-        className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-surface border-r border-stone-200 transition-transform duration-300 flex flex-col justify-between p-4 shrink-0 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      <aside
+        className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-surface border-r border-stone-200 flex flex-col p-4 shrink-0 transition-transform duration-300 ${
+          isOpen ? 'translate-x-0 shadow-neo-lg md:shadow-none' : '-translate-x-full md:translate-x-0'
         }`}
       >
-        <div className="space-y-6">
-          {/* Logo & Identity */}
-          <div className="flex items-center justify-between px-2">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-red-500/20 border border-red-400/40 flex items-center justify-center text-red-400 font-bold">
-                <Siren className="w-5 h-5 animate-pulse" />
-              </div>
-              <div>
-                <h1 className="font-bold text-sm tracking-wide text-stone-900">SOS COMMAND</h1>
-                <p className="text-[10px] text-stone-500">Admin Control Panel</p>
-              </div>
+        {/* Logo & Identity */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-neo-sm flex items-center justify-center">
+              <Siren className="w-5 h-5" />
             </div>
-            {/* Tombol Close Sidebar (Mobile Only) */}
-            <button onClick={onClose} className="md:hidden text-stone-500">
-              <X className="w-5 h-5" />
-            </button>
+            <div>
+              <h1 className="font-extrabold text-sm tracking-tight text-stone-900">SOS COMMAND</h1>
+              <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Admin Panel</p>
+            </div>
           </div>
-
-          {/* Navigasi Links */}
-          <nav className="space-y-1">
-            <NavLink
-              to="/admin"
-              end
-              onClick={onClose}
-              className={({ isActive }) => `flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition border ${
-                isActive
-                  ? 'bg-blue-500/10 text-blue-700 border-blue-500/30'
-                  : 'text-stone-500 hover:bg-stone-300 border-transparent'
-              }`}
-            >
-              <LayoutDashboard className="w-4 h-4" /> Live Dashboard
-            </NavLink>
-            <NavLink
-              to="/admin/pengguna"
-              onClick={onClose}
-              className={({ isActive }) => `flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition border ${
-                isActive
-                  ? 'bg-blue-500/10 text-blue-700 border-blue-500/30'
-                  : 'text-stone-500 hover:bg-stone-300 border-transparent'
-              }`}
-            >
-              <Users className="w-4 h-4" /> Kelola Pengguna
-            </NavLink>
-            <NavLink
-              to="/admin/riwayat-laporan"
-              onClick={onClose}
-              className={({ isActive }) => `flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition border ${
-                isActive
-                  ? 'bg-blue-500/10 text-blue-700 border-blue-500/30'
-                  : 'text-stone-500 hover:bg-stone-300 border-transparent'
-              }`}
-            >
-              <History className="w-4 h-4" /> Riwayat Laporan
-            </NavLink>
-          </nav>
+          {/* Tombol Close Sidebar (Mobile Only) */}
+          <button
+            onClick={onClose}
+            className="md:hidden p-1.5 text-stone-400 hover:text-stone-700 hover:bg-stone-100 rounded-lg transition"
+            aria-label="Tutup menu"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        {/* Info Petugas Admin + Tombol Logout */}
-        <div className="space-y-2">
-          <div className="p-3 bg-stone-200/60 rounded-xl border border-stone-200 flex items-center gap-3 text-xs">
-            <div className="w-8 h-8 rounded-full bg-red-600 text-white font-bold flex items-center justify-center uppercase">
-              {user?.nama ? user.nama.charAt(0) : 'A'}
-            </div>
-            <div className="truncate">
-              <p className="font-semibold text-stone-800 truncate">{user?.nama || 'Admin'}</p>
-              <p className="text-[10px] text-emerald-400">● System Active</p>
-            </div>
-          </div>
+        {/* Label Section */}
+        <p className="px-3 mb-2 text-[10px] font-extrabold uppercase tracking-[0.14em] text-stone-400">
+          Menu Utama
+        </p>
 
-          {/* Tombol Keluar */}
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-stone-200/60 rounded-xl shadow-neo-sm border border-stone-200 text-red-400 font-semibold text-xs hover:bg-red-500/10 hover:border-red-400 transition"
-          >
-            <LogOut className="w-4 h-4" /> Keluar
-          </button>
+        {/* Navigasi Links */}
+        <nav className="space-y-1.5 flex-1 overflow-y-auto">
+          {navItems.map(({ to, end, icon: Icon, label }) => (
+            <NavLink key={to} to={to} end={end} onClick={onClose}>
+              {({ isActive }) => (
+                <span
+                  className={`group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
+                    isActive
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-neo-sm'
+                      : 'text-stone-600 bg-transparent border-transparent hover:bg-stone-100 hover:text-blue-700'
+                  }`}
+                >
+                  <Icon
+                    className={`w-4 h-4 shrink-0 ${
+                      isActive ? 'text-white' : 'text-stone-400 group-hover:text-blue-600'
+                    }`}
+                  />
+                  {label}
+                </span>
+              )}
+            </NavLink>
+          ))}
+        </nav>
+
+        {/* Footer Status Sistem */}
+        <div className="mt-4 rounded-2xl border border-stone-200 bg-gradient-to-br from-surface to-inset p-3">
+          <div className="flex items-center gap-2">
+            <span className="relative flex w-2 h-2 shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full w-2 h-2 bg-emerald-500" />
+            </span>
+            <p className="text-[10px] font-bold text-stone-700">SEMUA SISTEM NORMAL</p>
+          </div>
+          <p className="mt-1 text-[10px] font-medium text-stone-500 truncate">
+            Masuk sebagai {user?.nama || 'Admin'} • v1.0
+          </p>
         </div>
       </aside>
 
       {/* Overlay Gelap jika Sidebar Dibuka di Layar Kecil */}
       {isOpen && (
-        <div 
+        <div
           onClick={onClose}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+          className="fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-40 md:hidden"
         />
       )}
     </>

@@ -12,8 +12,10 @@ const gayaApp = {
     popup: "!rounded-2xl !border !border-stone-200 !shadow-neo-lg !p-6",
     title: "!text-base !font-bold !text-stone-900",
     htmlContainer: "!text-xs !text-stone-500 !leading-relaxed",
-    confirmButton: "!rounded-xl !text-xs !font-bold !px-5 !py-2.5 !bg-red-600 hover:!bg-red-700",
-    cancelButton: "!rounded-xl !text-xs !font-bold !px-5 !py-2.5 !bg-surface !border !border-stone-300 !text-stone-600",
+    confirmButton:
+      "!rounded-xl !text-xs !font-bold !px-5 !py-2.5 !bg-red-600 hover:!bg-red-700",
+    cancelButton:
+      "!rounded-xl !text-xs !font-bold !px-5 !py-2.5 !bg-surface !border !border-stone-300 !text-stone-600",
     actions: "!gap-2 !mt-5",
   },
 };
@@ -64,4 +66,16 @@ export const konfirmasiLogout = () =>
     icon: "question",
     confirmButtonText: "Ya, Keluar",
     cancelButtonText: "Batal",
+  });
+
+export const konfirmasiBatalSos = () =>
+  Swal.fire({
+    ...gayaApp,
+    showCancelButton: true,
+    reverseButtons: true,
+    title: "Batalkan Sinyal SOS?",
+    text: "Sinyal akan dihapus dan relawan berhenti menerima notifikasinya.",
+    icon: "question",
+    confirmButtonText: "Ya, Batalkan",
+    cancelButtonText: "Lanjutkan Menunggu",
   });

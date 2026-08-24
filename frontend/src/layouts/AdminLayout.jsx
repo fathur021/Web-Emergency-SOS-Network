@@ -123,6 +123,7 @@ useEffect(() => {
           onOpenSidebar={() => setIsSidebarOpen(true)}
           pendingCount={pendingCount}
           inProgressCount={inProgressCount}
+          volunteersCount={volunteers.length}
         />
 
         {/* HALAMAN YANG DITUJU */}

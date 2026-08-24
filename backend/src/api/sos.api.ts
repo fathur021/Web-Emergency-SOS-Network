@@ -43,7 +43,7 @@ router.patch("/:id/data", updateSosDataController);
 
 // ---- DELETE /api/sos/:id ----
 // Menghapus sinyal — hanya admin
-router.delete("/:id", requireRole("admin"), deleteSosController);
+router.delete("/:id", deleteSosController);
 
 
 

@@ -8,6 +8,7 @@ import type {
 } from "../interface/sos.interface.js";
 import { unlink } from "fs/promises";
 import path from "path";
+import { request } from "http";
 
 async function createSosServices(
   userId: string | Types.ObjectId,
@@ -67,10 +68,10 @@ async function updateSosStatusServices(
 
   // ---- 1. Aturan transisi status ----
   const allowedTransitions: Record<string, string[]> = {
-    pending: ["in_progress"],             // pending hanya bisa diklaim
+    pending: ["in_progress"], // pending hanya bisa diklaim
     in_progress: ["resolved", "pending"], // lanjut selesai / batalkan
-    resolved: [],                          // sudah selesai = terkunci
-    rejected: [],                          // ditolak admin = terkunci
+    resolved: [], // sudah selesai = terkunci
+    rejected: [], // ditolak admin = terkunci
   };
   if (!allowedTransitions[existing.status]?.includes(input.status)) {
     throw new AppError(
@@ -133,16 +134,34 @@ async function updateSosDataServices(id: string, input: IUpdateSosDataInput) {
   return sos;
 }
 
-async function deleteSosServices(id: string) {
+async function deleteSosServices(
+  id: string,
+  requester?: { userId: string | Types.ObjectId; isAdmin: boolean },
+) {
   const existing = await Sos.findById(id);
   if (!existing) {
     throw new AppError(404, "Sinyal SOS tidak ditemukan");
   }
+
+  if (requester && !requester.isAdmin) {
+    const isOwner = String(existing.userId) === String(requester.userId);
+    if (!isOwner) {
+      throw new AppError(
+        403,
+        "Kamu hanya bisa membatalkan sinyal SOS milikmu sendiri",
+      );
+    }
+    if (existing.status !== "pending") {
+      throw new AppError(
+        403,
+        "Sinyal sudah ditangani relawan dan tidak bisa dibatalkan lagi",
+      );
+    }
+  }
+
   if (existing.image) {
     const filename = existing.image.replace("/uploads/", "");
-    await unlink(path.join("uploads", filename)).catch(()=>{
-
-    })
+    await unlink(path.join("uploads", filename)).catch(() => {});
   }
 
   await Sos.findByIdAndDelete(id);

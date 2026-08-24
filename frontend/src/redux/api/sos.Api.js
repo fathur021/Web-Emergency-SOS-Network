@@ -111,6 +111,13 @@ export const sosApi = createApi({
       }),
       invalidatesTags: ["User"],
     }),
+    deleteSos: builder.mutation({
+      query: (id) => ({
+        url: `/sos/${id}`,
+         method: "DELETE"
+      }),
+      invalidatesTags: ["Sos"]
+    })
   }),
 });
 
