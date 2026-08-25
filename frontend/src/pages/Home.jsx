@@ -65,6 +65,10 @@ const Home = () => {
     ]);
   };
 
+  const handleSosDeleted = (id) => {
+    setActiveSosMarkers((prev) => prev.filter((m) => m.id !== id));
+  };
+
   useEffect(() => {
     if (!navigator.geolocation) return;
 
@@ -98,7 +102,7 @@ const Home = () => {
 
       {/* 3. MAIN CONTENT (TOMBOL SOS CARD) */}
       <main className="relative z-20 p-4">
-        <SosCard onCoordsChange={setCoords} onSosCreated={handleSosCreated}/>
+        <SosCard onCoordsChange={setCoords} onSosCreated={handleSosCreated} onSosDeleted={handleSosDeleted} />
       </main>
 
       {/* 4. FOOTER */}

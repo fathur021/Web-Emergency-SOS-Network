@@ -68,13 +68,14 @@ export const konfirmasiLogout = () =>
     cancelButtonText: "Batal",
   });
 
+// Dialog konfirmasi pembatalan sinyal SOS oleh pengguna
 export const konfirmasiBatalSos = () =>
   Swal.fire({
     ...gayaApp,
     showCancelButton: true,
     reverseButtons: true,
     title: "Batalkan Sinyal SOS?",
-    text: "Sinyal akan dihapus dan relawan berhenti menerima notifikasinya.",
+    text: "Sinyal akan dihapus dan relawan tidak lagi menerima notifikasinya.",
     icon: "question",
     confirmButtonText: "Ya, Batalkan",
     cancelButtonText: "Lanjutkan Menunggu",

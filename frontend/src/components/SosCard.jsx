@@ -6,22 +6,40 @@ import {
   Clock,
   RotateCcw,
   Loader2,
+  Bike,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useCreateSosMutation } from "../redux/api/sos.Api";
+import {
+  useCreateSosMutation,
+  useGetSosByUserQuery,
+  useDeleteSosMutation,
+} from "../redux/api/sos.Api";
+import { konfirmasiBatalSos, popupSukses, popupGagal } from "../utils/alert";
 
 const DEFAULT_COORDS = { latitude: -0.947, longitude: 100.354 };
 
-const SosCard = ({ onCoordsChange, onSosCreated }) => {
-  const [isSosSent, setIsSosSent] = useState(false);
+const SosCard = ({ onCoordsChange, onSosCreated, onSosDeleted }) => {
   const [description, setDescription] = useState("");
   const navigate = useNavigate();
   const [imageFile, setImageFile] = useState(null);
-  const [sentCoords, setSentCoords] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
   const [error, setError] = useState("");
 
+  const hasToken = Boolean(localStorage.getItem("token"));
   const [createSos] = useCreateSosMutation();
+  const [deleteSos] = useDeleteSosMutation();
+
+  // Deteksi SOS aktif milik user (pending / in_progress).
+  // State kartu dibaca dari server → anti duplikat & tetap ada setelah refresh.
+  const { data: mySosData } = useGetSosByUserQuery(undefined, {
+    skip: !hasToken,
+  });
+  const activeSos = (mySosData?.data || []).find(
+    (s) => s.status === "pending" || s.status === "in_progress",
+  );
+  const activePendingId =
+    activeSos?.status === "pending" ? activeSos._id : null;
 
   const getCurrentPosition = () => {
     return new Promise((resolve) => {
@@ -44,7 +62,7 @@ const SosCard = ({ onCoordsChange, onSosCreated }) => {
   const handleSendSOS = async () => {
     setError("");
 
-    if (!localStorage.getItem("token")) {
+    if (!hasToken) {
       setError("Silahkan login terlebih dahulu untuk mengirim SOS");
       setTimeout(() => navigate("/login"), 800);
       return;
@@ -54,7 +72,6 @@ const SosCard = ({ onCoordsChange, onSosCreated }) => {
     try {
       const coords = await getCurrentPosition();
       onCoordsChange?.(coords);
-      setSentCoords(coords);
 
       const formData = new FormData();
       formData.append("latitude", coords.latitude);
@@ -64,13 +81,9 @@ const SosCard = ({ onCoordsChange, onSosCreated }) => {
       if (imageFile) formData.append("image", imageFile);
 
       const response = await createSos(formData).unwrap();
-      onSosCreated?.(response?.data || {
-        latitude: coords.latitude,
-        longitude: coords.longitude,
-        description: description.trim(),
-        status: "pending",
-      });
-      setIsSosSent(true);
+      onSosCreated?.(response?.data);
+      setDescription("");
+      setImageFile(null);
     } catch (error) {
       setError(error?.data?.message || "Gagal mengirim SOS, coba lagi.");
     } finally {
@@ -78,15 +91,34 @@ const SosCard = ({ onCoordsChange, onSosCreated }) => {
     }
   };
 
-  const handleCancelSOS = () => {
-    // Panggil API / Socket.IO event batalkan SOS di sini
-    setIsSosSent(false);
+  const handleCancelSOS = async () => {
+    if (!activePendingId) return;
+    const hasil = await konfirmasiBatalSos();
+    if (!hasil.isConfirmed) return;
+
+    setIsCancelling(true);
+    try {
+      await deleteSos(activePendingId).unwrap();
+      popupSukses("Sinyal SOS berhasil dibatalkan");
+      onSosDeleted?.(activePendingId);
+    } catch (error) {
+      popupGagal(error?.data?.message || "Gagal membatalkan sinyal SOS");
+    } finally {
+      setIsCancelling(false);
+    }
   };
+
+  // Koordinat & nama relawan diambil dari data SOS aktif di server
+  const sosCoords = activeSos
+    ? { latitude: activeSos.latitude, longitude: activeSos.longitude }
+    : null;
+  const volunteerName = activeSos?.volunteerId?.nama;
+  const isClaimed = activeSos?.status === "in_progress";
 
   return (
     <div className="bg-surface/90 backdrop-blur-xl border border-stone-200 rounded-3xl p-6 shadow-neo space-y-6 text-center w-full max-w-md">
-      {!isSosSent ? (
-        /* STATE A: SEBELUM TOMBOL SOS DITEKAN */
+      {!activeSos ? (
+        /* STATE A: BELUM ADA SOS AKTIF */
         <>
           <div>
             <h1 className="text-xl font-bold text-stone-900">
@@ -168,8 +200,52 @@ const SosCard = ({ onCoordsChange, onSosCreated }) => {
             </p>
           )}
         </>
+      ) : isClaimed ? (
+        /* STATE C: DIKLAIM RELAWAN — TIDAK BISA DIBATALKAN */
+        <>
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-400/30 text-emerald-500 text-xs font-semibold">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              Relawan Menuju Lokasi
+            </div>
+            <h2 className="text-lg font-bold text-stone-900">
+              {volunteerName
+                ? `${volunteerName} Sedang Membantu`
+                : "Relawan Sedang Menangani"}
+            </h2>
+            {sosCoords && (
+              <p className="text-[11px] text-stone-400 font-mono">
+                Lokasi: {sosCoords.latitude.toFixed(6)},
+                {" "}
+                {sosCoords.longitude.toFixed(6)}
+              </p>
+            )}
+          </div>
+
+          {/* Stepper Status */}
+          <div className="py-4 space-y-3 text-left">
+            <div className="flex items-center gap-3 text-xs">
+              <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+              <span className="text-stone-800 font-medium">
+                Sinyal diterima sistem
+              </span>
+            </div>
+            <div className="flex items-center gap-3 text-xs">
+              <Bike className="w-5 h-5 text-blue-600 animate-pulse shrink-0" />
+              <span className="text-blue-600 font-medium">
+                {volunteerName
+                  ? `${volunteerName} dalam perjalanan ke lokasimu`
+                  : "Menunggu kedatangan relawan"}
+              </span>
+            </div>
+          </div>
+
+          <p className="text-[11px] text-stone-400">
+            Sinyal sudah ditangani relawan dan tidak bisa dibatalkan lagi.
+          </p>
+        </>
       ) : (
-        /* STATE B: SETELAH SOS DITEKAN (STATUS TRACKER) */
+        /* STATE B: PENDING — MASIH BISA DIBATALKAN */
         <>
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-400/30 text-red-400 text-xs font-semibold">
@@ -179,9 +255,11 @@ const SosCard = ({ onCoordsChange, onSosCreated }) => {
             <h2 className="text-lg font-bold text-stone-900">
               Mencari Relawan Terdekat...
             </h2>
-             {sentCoords && (
+            {sosCoords && (
               <p className="text-[11px] text-stone-400 font-mono">
-                Lokasi: {sentCoords.latitude.toFixed(6)}, {sentCoords.longitude.toFixed(6)}
+                Lokasi: {sosCoords.latitude.toFixed(6)},
+                {" "}
+                {sosCoords.longitude.toFixed(6)}
               </p>
             )}
           </div>
@@ -202,13 +280,18 @@ const SosCard = ({ onCoordsChange, onSosCreated }) => {
             </div>
           </div>
 
-          {/* Tombol Batal */}
+          {/* Tombol Batal — benar-benar menghapus sinyal lewat API */}
           <button
             onClick={handleCancelSOS}
-            className="w-full py-2.5 bg-stone-200 hover:bg-stone-300 text-stone-600 rounded-xl shadow-neo-sm font-semibold text-xs transition border border-stone-300 flex items-center justify-center gap-2"
+            disabled={isCancelling}
+            className="w-full py-2.5 bg-stone-200 hover:bg-stone-300 disabled:opacity-60 text-stone-600 rounded-xl shadow-neo-sm font-semibold text-xs transition border border-stone-300 flex items-center justify-center gap-2 cursor-pointer"
           >
-            <RotateCcw className="w-4 h-4" />
-            Batalkan SOS (Salah Tekan)
+            {isCancelling ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <RotateCcw className="w-4 h-4" />
+            )}
+            {isCancelling ? "MEMBATALKAN..." : "Batalkan SOS (Salah Tekan)"}
           </button>
         </>
       )}

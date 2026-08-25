@@ -114,10 +114,24 @@ export const sosApi = createApi({
     deleteSos: builder.mutation({
       query: (id) => ({
         url: `/sos/${id}`,
-         method: "DELETE"
+        method: "DELETE",
       }),
-      invalidatesTags: ["Sos"]
-    })
+      async onQueryStarted(id, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          // Hapus SOS dari cache getSosByUser secara langsung.
+          // TANPA invalidatesTags: backend melempar 404 kalau list kosong,
+          // sehingga refetch gagal dan cache lama kembali (rollback).
+          dispatch(
+            sosApi.util.updateQueryData("getSosByUser", undefined, (draft) => {
+              if (draft?.data) {
+                draft.data = draft.data.filter((s) => s._id !== id);
+              }
+            }),
+          );
+        } catch {}
+      },
+    }),
   }),
 });
 
@@ -133,5 +147,6 @@ export const {
   useUpdateUserStatusMutation,
   useDeleteUserMutation,
   useCreateUserMutation,
-  useUpdateUserMutation
+  useUpdateUserMutation,
+  useDeleteSosMutation
 } = sosApi;
