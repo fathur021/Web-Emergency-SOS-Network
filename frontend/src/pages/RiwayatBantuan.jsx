@@ -13,6 +13,8 @@ import {
   useGetAllSosQuery,
   useUpdateSosStatusMutation,
 } from '../redux/api/sos.Api';
+import { getImageUrl } from '../config/api';
+
 
 // volunteerId bisa berupa objek hasil populate { _id, nama } atau string/ObjectId
 const getVolunteerId = (s) =>
@@ -170,8 +172,21 @@ const RiwayatBantuan = () => {
                   </span>
                 </div>
 
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
+                <div className="flex items-stretch gap-3">
+                  {/* FOTO SOS — thumbnail di samping KIRI.
+                      Hanya dirender kalau field image terisi (truthy). */}
+                  {item.image && (
+                    <div className="shrink-0 w-20 h-20 sm:w-24 sm:h-24 self-center overflow-hidden rounded-xl border border-stone-200">
+                      <img
+                        src={getImageUrl(item.image)}
+                        alt="Foto lokasi kejadian"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+
+                  {/* Kolom teks (deskripsi + lokasi) */}
+                  <div className="min-w-0 flex-1">
                     <h4 className="font-bold text-sm text-stone-900">
                       {item.description || 'Sinyal SOS Darurat'}
                     </h4>
@@ -181,16 +196,17 @@ const RiwayatBantuan = () => {
                         {item.latitude?.toFixed(4)}, {item.longitude?.toFixed(4)}
                       </span>
                     </p>
+
+                    {item.status === 'in_progress' && (
+                      <button
+                        onClick={() => handleResolve(item._id)}
+                        className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-xs transition cursor-pointer"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        TANDAI SELESAI
+                      </button>
+                    )}
                   </div>
-                  {item.status === 'in_progress' && (
-                    <button
-                      onClick={() => handleResolve(item._id)}
-                      className="shrink-0 flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs transition cursor-pointer"
-                    >
-                      <Check className="w-3.5 h-3.5" />
-                      TANDAI SELESAI
-                    </button>
-                  )}
                 </div>
               </div>
             );

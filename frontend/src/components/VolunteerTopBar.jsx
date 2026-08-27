@@ -8,6 +8,7 @@ import {
   useGetAllSosQuery,
   useUpdateSosStatusMutation,
 } from '../redux/api/sos.Api';
+import { getImageUrl } from '../config/api';
 
 // volunteerId bisa berupa objek hasil populate { _id, nama } atau string/ObjectId
 const getVolunteerId = (s) =>
@@ -138,6 +139,15 @@ const VolunteerTopBar = ({ isOnline, setIsOnline, onOpenSidebar }) => {
                         <MapPin className="w-3 h-3 text-amber-400 shrink-0" />
                         {s.latitude?.toFixed(4)}, {s.longitude?.toFixed(4)}
                       </p>
+                      {/* FOTO SOS — tampilkan gambar yang di-upload pelapor.
+                          Hanya dirender kalau field image ada (truthy). */}
+                      {s.image && (
+                        <img
+                          src={getImageUrl(s.image)}
+                          alt="Foto lokasi kejadian"
+                          className="w-full h-28 object-cover rounded-lg border border-stone-300 mt-1"
+                        />
+                      )}
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleResolve(s._id)}

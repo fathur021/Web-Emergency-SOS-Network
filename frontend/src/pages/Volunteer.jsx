@@ -3,7 +3,7 @@ import MapView from "../components/MapContainer";
 import { useGetVolunteersQuery } from "../redux/api/sos.Api";
 
 const Volunteer = () => {
-  const { sosList } = useOutletContext();
+  const { sosList, volunteerCoords, acceptedSos } = useOutletContext();
   const { data: volunteersData } = useGetVolunteersQuery();
 
   // Ubah data SOS dari backend jadi format markers yang dimengerti MapView:
@@ -34,11 +34,17 @@ const Volunteer = () => {
       radius: v.radius || 5000,
     }));
 
+  // 🆕 TAMBAH BARU — hitung titik awal & akhir rute
+  const routeFrom = volunteerCoords;
+  const routeTo = acceptedSos
+    ? { lat: acceptedSos.latitude, lng: acceptedSos.longitude }
+    : null;
+
   return (
     <>
       {/* Peta Radar SOS + Lokasi Relawan */}
       <div className="absolute inset-0 z-0">
-        <MapView markers={markers} volunteers={volunteerMarkers} zoom={12} />
+        <MapView markers={markers} volunteers={volunteerMarkers} zoom={12} routeFrom={routeFrom} routeTo={routeTo} />
       </div>
     </>
   );

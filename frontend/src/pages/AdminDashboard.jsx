@@ -1,6 +1,7 @@
 import React from 'react';
 import { useOutletContext } from 'react-router-dom';
 import MapView from '../components/MapContainer';
+import { getImageUrl } from '../config/api';
 
 const AdminDashboard = () => {
   const { incidents, volunteers } = useOutletContext();
@@ -39,9 +40,26 @@ const AdminDashboard = () => {
                 <span className="text-[10px] text-stone-500">{item.time}</span>
               </div>
 
-              <h4 className="font-bold text-sm text-stone-900">{item.title}</h4>
-              <p className="text-xs text-stone-500">{item.location}</p>
-              <p className="text-[11px] text-stone-400 line-clamp-2">"{item.desc}"</p>
+              <div className="flex items-stretch gap-3">
+                {/* FOTO SOS — thumbnail avatar di samping KIRI.
+                    Hanya dirender kalau field image terisi (truthy). */}
+                {item.image && (
+                  <div className="shrink-0 w-12 h-12 sm:w-14 sm:h-14 self-center overflow-hidden rounded-xl border border-stone-200">
+                    <img
+                      src={getImageUrl(item.image)}
+                      alt="Foto lokasi kejadian"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+
+                {/* Kolom teks ringkas */}
+                <div className="min-w-0 flex-1">
+                  <h4 className="font-bold text-sm text-stone-900 truncate">{item.title}</h4>
+                  <p className="text-xs text-stone-500 truncate">{item.location}</p>
+                  <p className="text-[11px] text-stone-400 line-clamp-2">"{item.desc}"</p>
+                </div>
+              </div>
             </div>
           ))}
         </div>

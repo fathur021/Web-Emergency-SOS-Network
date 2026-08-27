@@ -14,6 +14,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { useGetAllSosQuery } from "../redux/api/sos.Api";
+import { getImageUrl } from "../config/api";
 
 const statusLabel = {
   pending: "Pending",
@@ -41,6 +42,7 @@ const RiwayatLaporan = () => {
         status: statusLabel[s.status] || s.status,
         assignedTo: s.volunteerId?.nama || "-",
         desc: s.description || "(tanpa deskripsi)",
+        image: s.image, // path relatif gambar (jika ada)
       };
     });
   }, [sosData]);
@@ -223,8 +225,20 @@ const RiwayatLaporan = () => {
                 </span>
               </div>
 
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
+              <div className="flex items-stretch gap-3">
+                {/* FOTO SOS — thumbnail avatar di samping KIRI.
+                    Hanya dirender kalau field image terisi (truthy). */}
+                {item.image && (
+                  <div className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 self-center overflow-hidden rounded-xl border border-stone-200">
+                    <img
+                      src={getImageUrl(item.image)}
+                      alt="Foto lokasi kejadian"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+
+                <div className="min-w-0 flex-1">
                   <h4 className="font-bold text-sm text-stone-900">
                     {item.title}
                   </h4>

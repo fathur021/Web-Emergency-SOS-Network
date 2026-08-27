@@ -1,4 +1,5 @@
 import { Siren, MapPin, Check, X, AlertTriangle } from 'lucide-react';
+import { getImageUrl } from '../config/api';
 
 const VolunteerSosModal = ({ sosData, onAccept, onReject }) => {
   return (
@@ -32,6 +33,16 @@ const VolunteerSosModal = ({ sosData, onAccept, onReject }) => {
             <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
             <span>{sosData.description}</span>
           </p>
+
+          {/* FOTO SOS — tampilkan gambar pelapor bila ada.
+              sosData.image berasal dari data SOS yang masuk (sos.image). */}
+          {sosData.image && (
+            <img
+              src={getImageUrl(sosData.image)}
+              alt="Foto lokasi kejadian"
+              className="w-full h-36 object-cover rounded-xl border border-stone-300"
+            />
+          )}
 
           <div className="flex gap-2 pt-1">
             <button

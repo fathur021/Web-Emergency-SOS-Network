@@ -1,5 +1,5 @@
-import { Circle, MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
-import { Fragment, useEffect, useLayoutEffect } from 'react';
+import { Circle, MapContainer, Marker, Popup, Polyline, TileLayer, useMap } from 'react-leaflet';
+import { Fragment, useEffect, useLayoutEffect, useState } from 'react';
 import L from 'leaflet';
 
 const VOLUNTEER_COLORS = ['#2563eb', '#0f766e', '#d97706', '#16a34a', '#c026d3', '#4f46e5', '#0891b2'];
@@ -43,6 +43,57 @@ const createVolunteerIcon = (color, name) => {
     iconAnchor: [39, 34],
     popupAnchor: [0, -28],
   });
+};
+
+// 🆕 TAMBAH BARU — Komponen rute navigasi dari relawan ke lokasi SOS
+const RouteLine = ({ from, to }) => {
+  const map = useMap();
+  const [coordinates, setCoordinates] = useState(null);
+
+  useEffect(() => {
+    if (!from || !to) { setCoordinates(null); return; }
+    let cancelled = false;
+
+    const fetchRoute = async () => {
+      try {
+        const url = `https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (!cancelled && data.routes?.[0]?.geometry?.coordinates) {
+          const coords = data.routes[0].geometry.coordinates.map((c) => [c[1], c[0]]);
+          setCoordinates(coords);
+        } else if (!cancelled) {
+          setCoordinates([[from.lat, from.lng], [to.lat, to.lng]]);
+        }
+      } catch {
+        if (!cancelled) setCoordinates([[from.lat, from.lng], [to.lat, to.lng]]);
+      }
+    };
+
+    fetchRoute();
+    return () => { cancelled = true; };
+  }, [from?.lat, from?.lng, to?.lat, to?.lng]);
+
+  useEffect(() => {
+    if (!coordinates || coordinates.length === 0) return;
+    const bounds = L.latLngBounds(coordinates);
+    map.fitBounds(bounds, { padding: [80, 80], maxZoom: 15 });
+  }, [coordinates, map]);
+
+  if (!coordinates || coordinates.length === 0) return null;
+
+  return (
+    <Polyline
+      positions={coordinates}
+      pathOptions={{
+        color: '#2563eb',
+        weight: 5,
+        opacity: 0.85,
+        lineCap: 'round',
+        lineJoin: 'round',
+      }}
+    />
+  );
 };
 
 const MapFixer = () => {
@@ -95,11 +146,16 @@ const MapPopup = ({ eyebrow, title, description, meta, variant = 'sos' }) => (
   </div>
 );
 
-const MapView = ({ latitude, longitude, markers = [], volunteers = [], zoom = 13 }) => {
+const MapView = ({ latitude, longitude, markers = [], volunteers = [], zoom = 13, routeFrom = null, routeTo = null }) => {
   const allPoints = [
     ...markers.map((m) => ({ lat: m.lat, lng: m.lng })),
     ...volunteers.map((v) => ({ lat: v.lat, lng: v.lng })),
   ];
+
+  // 🆕 TAMBAH BARU — masukkan titik rute ke bounds supaya peta zoom otomatis
+  if (routeFrom && routeTo) {
+    allPoints.push(routeFrom, routeTo);
+  }
 
   const center = allPoints.length > 0
     ? [allPoints[0].lat, allPoints[0].lng]
@@ -185,12 +241,23 @@ const MapView = ({ latitude, longitude, markers = [], volunteers = [], zoom = 13
           );
         })}
 
+        {/* 🆕 TAMBAH BARU — render garis rute navigasi */}
+        {routeFrom && routeTo && (
+          <RouteLine from={routeFrom} to={routeTo} />
+        )}
+
         {allPoints.length > 0 && <FitBounds markers={allPoints} />}
       </MapContainer>
 
       <div className="map-status-panel" aria-hidden="true">
         <span><strong>{markers.length}</strong> SOS aktif</span>
         <span><strong>{volunteers.length}</strong> relawan</span>
+        {/* 🆕 TAMBAH BARU — badge navigasi aktif */}
+        {routeFrom && routeTo && (
+          <span className="!bg-blue-500/10 !border-blue-500/40 !text-blue-700">
+            <strong>Navigasi Aktif</strong>
+          </span>
+        )}
       </div>
     </div>
   );

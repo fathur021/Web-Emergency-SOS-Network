@@ -6,6 +6,8 @@ import VolunteerTopBar from '../components/VolunteerTopBar';
 import VolunteerSosModal from '../components/VolunteerSosModal';
 import {
   useGetAllSosQuery,
+  useGetVolunteersQuery,
+  useUpdateLocationMutation,
   useUpdateSosStatusMutation,
 } from '../redux/api/sos.Api';
 import { getSocket } from '../services/socket';
@@ -17,9 +19,11 @@ const getVolunteerId = (s) =>
 // Ubah dokumen SOS (dari DB/socket) jadi bentuk yang dipakai modal
 const toSosData = (sos) => ({
   id: sos._id,
-  title: sos.description || 'Sinyal SOS Darurat',
+  title: sos.description || "Sinyal SOS Darurat",
   location: `Lat: ${sos.latitude}, Lng: ${sos.longitude}`,
-  description: sos.description || 'Butuh pertolongan segera',
+  latitude: sos.latitude,
+  longitude: sos.longitude,
+  description: sos.description || "Butuh pertolongan segera",
   image: sos.image,
 });
 
@@ -30,10 +34,70 @@ const VolunterLayouts = () => {
 
   const user = useSelector((state) => state.auth.user);
 
+  // 🆕 TAMBAH BARU — posisi GPS relawan secara real-time.
+  // Dipakai sebagai titik MULAI rute navigasi.
+  const [volunteerCoords, setVolunteerCoords] = useState(null);
+
   // Semua SOS dari DATABASE — modal bersumber dari sini,
   // jadi tetap muncul walau halaman di-refresh
   const { data } = useGetAllSosQuery();
   const [updateSosStatus] = useUpdateSosStatusMutation();
+  const { data: volunteersData } = useGetVolunteersQuery();
+  const [updateLocation] = useUpdateLocationMutation();
+
+  // 🆕 TAMBAH BARU — ambil posisi GPS.
+  // - getCurrentPosition dipanggil SEKALI saat mount supaya dapat lokasi cepat
+  // - watchPosition untuk pembaruan real-time
+  // - Posisi terakhir disimpan: TIDAK pernah di-reset ke null supaya garis tidak berkedip
+  // - Posisi juga dikirim ke server (updateLocation) agar posisi DB = posisi diri sendiri,
+  //   sehingga fallback tidak salah menunjuk relawan lain
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      console.warn('[GPS] Geolocation tidak didukung browser.');
+      return;
+    }
+
+    const applyPos = (pos) => {
+      const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      setVolunteerCoords(coords);
+      // simpan ke server supaya DB = posisi diri (untuk fallback yang benar)
+      updateLocation({ latitude: coords.lat, longitude: coords.lng })
+        .catch((e) => console.warn('[GPS] Gagal update lokasi ke server:', e?.data?.message));
+    };
+
+    const errorPos = (err) => {
+      console.warn('[GPS] error:', err.code, err.message);
+    };
+
+    // 1) dapat lokasi cepat sekali
+    navigator.geolocation.getCurrentPosition(applyPos, errorPos, {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 5000,
+    });
+
+    // 2) pantau pergerakan real-time
+    const watchId = navigator.geolocation.watchPosition(applyPos, errorPos, {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 10000,
+    });
+
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, [user?.id]);
+
+  // Fallback: kalau GPS belum dapat posisi, pakai koordinat DB MILIK DIRI SENDIRI
+  // (bukan relawan lain) supaya garis rute tidak mulai dari lokasi volunteer lain.
+  const dbVolunteerPos = (() => {
+    if (!user?.id || !volunteersData?.data) return null;
+    const me = volunteersData.data.find((v) => String(v._id) === String(user.id));
+    return me && me.latitude != null && me.longitude != null
+      ? { lat: me.latitude, lng: me.longitude }
+      : null;
+  })();
+
+  // Prioritas: GPS real-time > posisi DB diri sendiri > null (tanpa rute)
+  const effectiveVolunteerCoords = volunteerCoords || dbVolunteerPos;
 
   const [sosList, setSosList] = useState([]);
 
@@ -109,6 +173,15 @@ const VolunterLayouts = () => {
     setIncomingSos(null);
   };
 
+  // 🆕 TAMBAH BARU — cari SOS yang sedang ditangani relawan ini (untuk rute)
+  const acceptedSos = sosList.find(
+    (s) =>
+      s.status === "in_progress" &&
+      getVolunteerId(s) === user?.id &&
+      s.latitude != null &&
+      s.longitude != null,
+  );
+
   return (
     <div className="flex h-screen bg-stone-100 text-stone-900 font-sans overflow-hidden">
 
@@ -131,7 +204,7 @@ const VolunterLayouts = () => {
         {/* HALAMAN YANG DITUJU */}
         <main className="flex-1 relative z-0 overflow-hidden">
           {/* sosList diteruskan ke child (Volunteer.jsx) lewat context */}
-          <Outlet context={{ sosList }} />
+          <Outlet context={{ sosList, volunteerCoords: effectiveVolunteerCoords, acceptedSos }} />
 
           {/* Modal Notifikasi SOS Masuk (pending) */}
           {incomingSos && isOnline && (

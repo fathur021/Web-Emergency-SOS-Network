@@ -10,7 +10,14 @@ import * as middlewares from "./middleware/index.middleware.js";
 config();
 const app = express();
 app.use(morgan('dev'));
-app.use(helmet());
+app.use(
+  helmet({
+    // Izinkan frontend (origin lain) memuat resource seperti gambar upload.
+    // Default helmet mengirim `Cross-Origin-Resource-Policy: same-origin`
+    // yang memblokir <img> dari origin backend ke frontend (NotSameOrigin).
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
 app.use(cors());
 app.use(express.json());
 

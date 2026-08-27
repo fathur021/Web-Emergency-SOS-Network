@@ -15,6 +15,8 @@ import {
   useDeleteSosMutation,
 } from "../redux/api/sos.Api";
 import { konfirmasiBatalSos, popupSukses, popupGagal } from "../utils/alert";
+import { getImageUrl } from "../config/api";
+
 
 const DEFAULT_COORDS = { latitude: -0.947, longitude: 100.354 };
 
@@ -60,9 +62,7 @@ const SosCard = ({ onCoordsChange, onSosCreated, onSosDeleted }) => {
   };
 
   const handleSendSOS = async () => {
-    setError("");
-
-    if (!hasToken) {
+    setError("");    if (!hasToken) {
       setError("Silahkan login terlebih dahulu untuk mengirim SOS");
       setTimeout(() => navigate("/login"), 800);
       return;
@@ -114,6 +114,11 @@ const SosCard = ({ onCoordsChange, onSosCreated, onSosDeleted }) => {
     : null;
   const volunteerName = activeSos?.volunteerId?.nama;
   const isClaimed = activeSos?.status === "in_progress";
+
+  // URL preview untuk foto yang BARU dipilih user (belum dikirim ke server).
+  // URL.createObjectURL membuat alamat sementara dari file lokal,
+  // sehingga preview langsung tampil sebelum di-upload.
+  const imagePreview = imageFile ? URL.createObjectURL(imageFile) : null;
 
   return (
     <div className="bg-surface/90 backdrop-blur-xl border border-stone-200 rounded-3xl p-6 shadow-neo space-y-6 text-center w-full max-w-md">
@@ -193,6 +198,19 @@ const SosCard = ({ onCoordsChange, onSosCreated, onSosDeleted }) => {
               </label>
             </div>
           </div>
+          {/* PREVIEW FOTO — tampilkan gambar yang baru dipilih user */}
+          {imagePreview && (
+            <div className="pt-1 text-left">
+              <label className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider block mb-1">
+                Pratinjau Foto
+              </label>
+              <img
+                src={imagePreview}
+                alt="Pratinjau lokasi kejadian"
+                className="w-full h-40 object-cover rounded-xl border border-stone-200"
+              />
+            </div>
+          )}
           {/* Pesan error (belum login / gagal kirim) */}
           {error && (
             <p className="text-xs text-red-400 bg-red-500/10 border border-red-400/30 rounded-xl p-3 text-left">
@@ -221,6 +239,17 @@ const SosCard = ({ onCoordsChange, onSosCreated, onSosDeleted }) => {
               </p>
             )}
           </div>
+
+          {/* FOTO SOS — tampilkan gambar dari backend (STATE C: sudah diklaim) */}
+          {activeSos?.image && (
+            <div className="pt-1">
+              <img
+                src={getImageUrl(activeSos.image)}
+                alt="Foto lokasi kejadian"
+                className="w-full h-40 object-cover rounded-xl border border-stone-200"
+              />
+            </div>
+          )}
 
           {/* Stepper Status */}
           <div className="py-4 space-y-3 text-left">
@@ -263,6 +292,17 @@ const SosCard = ({ onCoordsChange, onSosCreated, onSosDeleted }) => {
               </p>
             )}
           </div>
+
+          {/* FOTO SOS — tampilkan gambar dari backend (STATE B: pending) */}
+          {activeSos?.image && (
+            <div className="pt-1">
+              <img
+                src={getImageUrl(activeSos.image)}
+                alt="Foto lokasi kejadian"
+                className="w-full h-40 object-cover rounded-xl border border-stone-200"
+              />
+            </div>
+          )}
 
           {/* Stepper Status */}
           <div className="py-4 space-y-3 text-left">
