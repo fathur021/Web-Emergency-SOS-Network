@@ -327,21 +327,21 @@ const KelolaPengguna = () => {
                   {u.role !== "Admin" && (
                     <button
                       onClick={() => bukaModalEdit(u)}
-                      className="p-1.5 text-stone-400 hover:text-blue-600 rounded-lg hover:bg-blue-500/10 transition cursor-pointer"
+                      className="group p-2 text-stone-500 rounded-lg bg-surface border border-stone-200 shadow-neo-sm hover:border-blue-500/40 hover:bg-gradient-to-r hover:from-blue-500 hover:to-cyan-500 hover:text-white hover:shadow-neo-md active:scale-90 transition-all duration-200 cursor-pointer"
                       title="Edit pengguna"
                     >
-                      <Pencil className="w-4 h-4" />
+                      <Pencil className="w-4 h-4 transition-transform duration-200 group-hover:-translate-y-0.5" />
                     </button>
                   )}
                   <button
                     onClick={() => removeUser(u)}
-                    className="p-1.5 text-stone-400 hover:text-red-400 rounded-lg hover:bg-red-500/10 transition cursor-pointer"
+                    className="group p-2 text-stone-500 rounded-lg bg-surface border border-stone-200 shadow-neo-sm hover:border-red-500/40 hover:bg-gradient-to-r hover:from-red-500 hover:to-rose-500 hover:text-white hover:shadow-neo-md active:scale-90 transition-all duration-200 cursor-pointer"
                     title="Hapus pengguna"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4 transition-transform duration-200 group-hover:-translate-y-0.5" />
                   </button>
-                  <button className="p-1.5 text-stone-400 hover:text-stone-900 rounded-lg hover:bg-stone-300 transition cursor-pointer">
-                    <MoreVertical className="w-4 h-4" />
+                  <button className="group p-2 text-stone-500 rounded-lg bg-surface border border-stone-200 shadow-neo-sm hover:border-stone-400 hover:bg-gradient-to-r hover:from-stone-500 hover:to-stone-600 hover:text-white hover:shadow-neo-md active:scale-90 transition-all duration-200 cursor-pointer">
+                    <MoreVertical className="w-4 h-4 transition-transform duration-200 group-hover:-translate-y-0.5" />
                   </button>
                 </div>
               </div>

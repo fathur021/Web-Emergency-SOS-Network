@@ -1,4 +1,5 @@
 import { Sos } from "../model/sos.model.js";
+import { User } from "../model/user.model.js";
 import { AppError } from "../error/app.error.js";
 import { Types } from "mongoose";
 import type {
@@ -167,6 +168,72 @@ async function deleteSosServices(
   await Sos.findByIdAndDelete(id);
   return { message: "Sinyal Sos Berhasil di hapus" };
 }
+
+async function getBestVolunteerServices(days = 30) {
+  //batas waktu: 30 hari terakhir (WIB via timestamp UTC, cukup pakai data)
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  //1. Group SOS resolved per volunteer dalam rentang waktu
+  const stats = await Sos.aggregate([
+    { $match: { status: "resolved", createdAt: { $gte: since } } },
+    { $group: { _id: "$volunteerId", totalResolved: { $sum: 1 } } },
+    { $sort: { totalResolved: -1 } },
+    //2. Ambil nama relawan dari koleksi User
+    {
+      $lookup: {
+        from: "users",
+        localField: "_id",
+        foreignField: "_id",
+        as: "volunteer",
+      },
+    },
+    { $unwind: { path: "$volunteer", preserveNullAndEmptyArrays: false } },
+    {
+      $project: {
+        _id: 0,
+        volunteerId: "$_id",
+        nama: "$volunteer.nama",
+        totalResolved: 1,
+      },
+    },
+  ]);
+  return stats;
+}
+
+// ==================================================================
+// SERVICE: getStatisticsSummaryServices
+// ==================================================================
+// Menghitung angka ringkasan untuk halaman statistik admin (30 hari terakhir):
+//   - totalLaporan  : semua SOS yang masuk
+//   - totalResolved : SOS yang berhasil diselesaikan
+//   - totalVolunteer: jumlah akun berrole volunteer
+async function getStatisticsSummaryServices(days = 30) {
+  // Rentang waktu: 30 hari terakhir dihitung dari sekarang.
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+  // Group semua SOS dalam rentang waktu → hitung total & jumlah resolved.
+  const [summary] = await Sos.aggregate([
+    { $match: { createdAt: { $gte: since } } },
+    {
+      $group: {
+        _id: null,
+        totalLaporan: { $sum: 1 },
+        totalResolved: {
+          $sum: { $cond: [{ $eq: ["$status", "resolved"] }, 1, 0] },
+        },
+      },
+    },
+  ]);
+
+  // Jumlah akun relawan (role "volunteer").
+  const totalVolunteer = await User.countDocuments({ role: "volunteer" });
+
+  return {
+    totalLaporan: summary?.totalLaporan || 0,
+    totalResolved: summary?.totalResolved || 0,
+    totalVolunteer,
+  };
+}
+
 export {
   createSosServices,
   getAllSosServices,
@@ -175,4 +242,6 @@ export {
   updateSosStatusServices,
   updateSosDataServices,
   deleteSosServices,
+  getBestVolunteerServices,
+  getStatisticsSummaryServices,
 };

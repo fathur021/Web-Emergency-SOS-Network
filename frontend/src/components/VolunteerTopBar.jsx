@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Menu, Power, LogOut, Bell, Check, X, MapPin } from 'lucide-react';
+import { Menu, Power, LogOut, Bell, Check, X, MapPin, ChevronDown, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../redux/authSlice';
@@ -18,6 +18,9 @@ const VolunteerTopBar = ({ isOnline, setIsOnline, onOpenSidebar }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
+
+  // State buka/tutup dropdown profil
+  const [profilOpen, setProfilOpen] = useState(false);
 
   const user = useSelector((state) => state.auth.user);
   const { data } = useGetAllSosQuery();
@@ -85,14 +88,6 @@ const VolunteerTopBar = ({ isOnline, setIsOnline, onOpenSidebar }) => {
           <Power className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">{isOnline ? 'NONAKTIFKAN' : 'AKTIFKAN'}</span>
         </button>
-
-        {/* Info Relawan yang Login */}
-        {user && (
-          <div className="hidden md:flex flex-col items-end leading-tight">
-            <p className="text-xs font-semibold text-stone-900">{user.nama}</p>
-            <p className="text-[10px] text-emerald-400 capitalize">● {user.role} active</p>
-          </div>
-        )}
 
         {/* Bel Notifikasi: hanya SOS yang sudah diterima belum di-resolved */}
         <div className="relative">
@@ -170,17 +165,73 @@ const VolunteerTopBar = ({ isOnline, setIsOnline, onOpenSidebar }) => {
           )}
         </div>
 
-        {/* Tombol Logout */}
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-1.5 px-3 py-2 bg-stone-200 text-red-400 rounded-xl shadow-neo-sm font-semibold text-xs hover:bg-red-500/10 transition cursor-pointer"
-        >
-          <LogOut className="w-4 h-4" />
-          <span className="hidden md:inline">Keluar</span>
-        </button>
+        <div className="w-px h-8 bg-stone-200 hidden sm:block" />
+
+        {/* Dropdown Profil Relawan */}
+        <div className="relative">
+          <button
+            onClick={() => setProfilOpen(!profilOpen)}
+            className="flex items-center gap-2 pl-1 pr-2.5 py-1.5 rounded-xl bg-surface border border-stone-200 shadow-neo-sm hover:bg-stone-100 transition cursor-pointer"
+            title="Menu profil"
+          >
+            {/* Avatar */}
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-600 to-teal-500 text-white text-xs font-extrabold uppercase flex items-center justify-center ring-2 ring-white shrink-0">
+              {user?.nama?.charAt(0) || 'V'}
+            </div>
+            <div className="hidden lg:flex flex-col items-start leading-tight text-left">
+              <p className="text-xs font-bold text-stone-900 max-w-[120px] truncate">{user?.nama}</p>
+              <p className="text-[10px] font-semibold text-emerald-500 capitalize flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                {user?.role}
+              </p>
+            </div>
+            <ChevronDown
+              className={`w-4 h-4 text-stone-400 transition-transform duration-200 ${profilOpen ? 'rotate-180' : ''}`}
+            />
+          </button>
+
+          {/* Panel dropdown */}
+          {profilOpen && (
+            <>
+              {/* Overlay: klik di luar untuk menutup */}
+              <div className="fixed inset-0 z-40" onClick={() => setProfilOpen(false)} />
+
+              <div className="absolute right-0 top-full mt-2 w-56 bg-surface border border-stone-200 rounded-2xl shadow-neo-lg z-50 overflow-hidden">
+                {/* Header kecil dalam dropdown */}
+                <div className="px-4 py-3 border-b border-stone-100">
+                  <p className="text-[10px] text-stone-400 uppercase tracking-wider">Masuk sebagai</p>
+                  <p className="text-xs font-bold text-stone-900 truncate">{user?.nama}</p>
+                  <p className="text-[10px] text-stone-500 truncate">{user?.email}</p>
+                </div>
+
+                {/* Menu Profile */}
+                <button
+                  onClick={() => setProfilOpen(false)}
+                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-stone-600 hover:bg-stone-100 hover:text-emerald-700 transition cursor-pointer"
+                >
+                  <User className="w-4 h-4" />
+                  Profil Saya
+                </button>
+
+                {/* Pemisah */}
+                <div className="my-1 h-px bg-stone-100" />
+
+                {/* Menu Logout */}
+                <button
+                  onClick={() => { setProfilOpen(false); handleLogout(); }}
+                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-red-500 hover:bg-red-500/10 transition cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Keluar
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </header>
   );
 };
 
 export default VolunteerTopBar;
+

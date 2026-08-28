@@ -118,16 +118,18 @@ useEffect(() => {
 
       {/* 2. AREA UTAMA */} 
       <div className="flex-1 flex flex-col min-w-0 h-full">
-        {/* TOPBAR */}
-        <AdminTopBar
-          onOpenSidebar={() => setIsSidebarOpen(true)}
-          pendingCount={pendingCount}
-          inProgressCount={inProgressCount}
-          volunteersCount={volunteers.length}
-        />
+        {/* TOPBAR — z-50 agar dropdown profil tidak tertutup konten di bawah */}
+        <div className="relative z-50">
+          <AdminTopBar
+            onOpenSidebar={() => setIsSidebarOpen(true)}
+            pendingCount={pendingCount}
+            inProgressCount={inProgressCount}
+            volunteersCount={volunteers.length}
+          />
+        </div>
 
         {/* HALAMAN YANG DITUJU */}
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex overflow-hidden relative z-0">
           <Outlet context={{ incidents, setIncidents, volunteers }} />
         </div>
       </div>

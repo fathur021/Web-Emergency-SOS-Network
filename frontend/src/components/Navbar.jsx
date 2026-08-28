@@ -1,4 +1,5 @@
-import { Siren, MapPin, ShieldCheck, LogIn, UserPlus, LogOut } from 'lucide-react';
+import { useState } from 'react';
+import { Siren, MapPin, ShieldCheck, LogIn, UserPlus, LogOut, ChevronDown, User } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../redux/authSlice';
@@ -11,6 +12,9 @@ const Navbar = () => {
 
   // Baca data user dari Redux (null kalau belum login)
   const user = useSelector((state) => state.auth.user);
+
+  // State buka/tutup dropdown profil
+  const [profilOpen, setProfilOpen] = useState(false);
 
   // Lokasi asli dari profil user (skip kalau belum login)
   const hasToken = Boolean(localStorage.getItem('token'));
@@ -52,23 +56,67 @@ const Navbar = () => {
       {/* Bagian kanan: berubah tergantung status login */}
       {user ? (
         <div className="flex items-center gap-2">
-          {/* Info user yang sedang login */}
-          <div className="flex items-center gap-2 bg-surface px-3.5 py-1.5 rounded-full border border-stone-200">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <div className="text-right leading-tight">
-              <p className="text-xs font-semibold text-stone-900">{user.nama}</p>
-              <p className="text-[10px] text-stone-500 capitalize">{user.role}</p>
-            </div>
-          </div>
+          {/* Dropdown Profil User */}
+          <div className="relative">
+            <button
+              onClick={() => setProfilOpen(!profilOpen)}
+              className="flex items-center gap-2 pl-1 pr-2.5 py-1.5 rounded-full bg-surface/80 border border-stone-200 hover:bg-stone-100 transition cursor-pointer"
+              title="Menu profil"
+            >
+              {/* Avatar */}
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-orange-500 text-white text-xs font-extrabold uppercase flex items-center justify-center ring-2 ring-white shrink-0">
+                {user?.nama?.charAt(0) || 'U'}
+              </div>
+              <div className="hidden sm:flex flex-col items-start leading-tight text-left">
+                <p className="text-xs font-bold text-stone-900 max-w-[120px] truncate">{user.nama}</p>
+                <p className="text-[10px] font-semibold text-emerald-500 capitalize flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  {user.role}
+                </p>
+              </div>
+              <ChevronDown
+                className={`w-4 h-4 text-stone-400 transition-transform duration-200 ${profilOpen ? 'rotate-180' : ''}`}
+              />
+            </button>
 
-          {/* Tombol Keluar */}
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-surface/80 border border-stone-300 text-red-400 rounded-full font-semibold text-xs hover:bg-red-500/10 hover:border-red-400 transition"
-          >
-            <LogOut className="w-4 h-4" />
-            <span className="hidden sm:inline">Keluar</span>
-          </button>
+            {/* Panel dropdown */}
+            {profilOpen && (
+              <>
+                {/* Overlay: klik di luar untuk menutup */}
+                <div className="fixed inset-0 z-40" onClick={() => setProfilOpen(false)} />
+
+                <div className="absolute right-0 top-full mt-2 w-56 bg-surface border border-stone-200 rounded-2xl shadow-neo-lg z-50 overflow-hidden">
+                  {/* Header kecil dalam dropdown */}
+                  <div className="px-4 py-3 border-b border-stone-100">
+                    <p className="text-[10px] text-stone-400 uppercase tracking-wider">Masuk sebagai</p>
+                    <p className="text-xs font-bold text-stone-900 truncate">{user.nama}</p>
+                    <p className="text-[10px] text-stone-500 truncate">{user.email}</p>
+                  </div>
+
+                  {/* Menu Profile */}
+                  <button
+                    onClick={() => setProfilOpen(false)}
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-stone-600 hover:bg-stone-100 hover:text-red-600 transition cursor-pointer"
+                  >
+                    <User className="w-4 h-4" />
+                    Profil Saya
+                  </button>
+
+                  {/* Pemisah */}
+                  <div className="my-1 h-px bg-stone-100" />
+
+                  {/* Menu Logout */}
+                  <button
+                    onClick={() => { setProfilOpen(false); handleLogout(); }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-red-500 hover:bg-red-500/10 transition cursor-pointer"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Keluar
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       ) : (
         <div className="flex items-center gap-2">

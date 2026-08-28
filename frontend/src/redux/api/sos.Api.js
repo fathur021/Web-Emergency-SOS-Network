@@ -111,6 +111,7 @@ export const sosApi = createApi({
       }),
       invalidatesTags: ["User"],
     }),
+
     deleteSos: builder.mutation({
       query: (id) => ({
         url: `/sos/${id}`,
@@ -132,6 +133,10 @@ export const sosApi = createApi({
         } catch {}
       },
     }),
+    getSosStatistic: builder.query({
+      query: () => "/sos/statistics",
+      providesTags: ["Sos"]
+    })
   }),
 });
 
@@ -148,5 +153,6 @@ export const {
   useDeleteUserMutation,
   useCreateUserMutation,
   useUpdateUserMutation,
-  useDeleteSosMutation
+  useDeleteSosMutation,
+  useGetSosStatisticQuery,
 } = sosApi;

@@ -11,7 +11,7 @@ import Login from './pages/Login.jsx'
 import VolunterLayouts from './layouts/VolunterLayouts.jsx'
 import AdminLayout from './layouts/AdminLayout.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
-
+import StatistikRelawan from './pages/StatistikRelawan.jsx'
 const App = () => {
   return (
     <BrowserRouter>
@@ -36,6 +36,7 @@ const App = () => {
             <Route index element={<AdminDashboard />} />
             <Route path="pengguna" element={<KelolaPengguna />} />
             <Route path="riwayat-laporan" element={<RiwayatLaporan />} />
+            <Route path="statistik-relawan" element={<StatistikRelawan/>}/>
           </Route>
         </Route>
       </Routes>

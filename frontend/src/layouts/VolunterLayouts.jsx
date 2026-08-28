@@ -194,12 +194,14 @@ const VolunterLayouts = () => {
       {/* 2. AREA UTAMA */}
       <div className="flex-1 flex flex-col min-w-0 h-full relative">
 
-        {/* TOPBAR (berisi notifikasi lonceng) */}
-        <VolunteerTopBar
-          isOnline={isOnline}
-          setIsOnline={setIsOnline}
-          onOpenSidebar={() => setIsSidebarOpen(true)}
-        />
+        {/* TOPBAR — z-50 agar dropdown profil tidak tertutup konten di bawah */}
+        <div className="relative z-50">
+          <VolunteerTopBar
+            isOnline={isOnline}
+            setIsOnline={setIsOnline}
+            onOpenSidebar={() => setIsSidebarOpen(true)}
+          />
+        </div>
 
         {/* HALAMAN YANG DITUJU */}
         <main className="flex-1 relative z-0 overflow-hidden">

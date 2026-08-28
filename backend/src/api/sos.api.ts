@@ -7,6 +7,7 @@ import {
   updateSosStatusController,
   updateSosDataController,
   deleteSosController,
+  getStatisticsController,
 } from "../controller/sos.controller.js";
 import { authenticate, requireRole } from "../middleware/auth.middleware.js";
 import { upload } from "../utils/upload.utils.js";
@@ -28,6 +29,12 @@ router.get("/user", getSosByUserController);
 // ---- GET /api/sos ----
 // Lihat semua sinyal (monitor) — hanya admin & relawan
 router.get("/", requireRole("admin", "volunteer"), getAllSosController);
+
+// ---- GET /api/sos/statistics ----
+// Statistik & ranking relawan terbaik — hanya admin.
+// PENTING: ditaruh SEBELUM "/:id" agar "statistics" tidak ditangkap
+// sebagai parameter id oleh Express.
+router.get("/statistics", requireRole("admin"), getStatisticsController);
 
 // ---- GET /api/sos/:id ----
 // Detail satu sinyal

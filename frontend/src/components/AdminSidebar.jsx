@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   Users,
   History,
+  BarChart3,
   Siren,
   X,
 } from 'lucide-react';
@@ -12,6 +13,7 @@ const navItems = [
   { to: '/admin', end: true, icon: LayoutDashboard, label: 'Live Dashboard' },
   { to: '/admin/pengguna', icon: Users, label: 'Kelola Pengguna' },
   { to: '/admin/riwayat-laporan', icon: History, label: 'Riwayat Laporan' },
+  { to: '/admin/statistik-relawan', icon: BarChart3, label: 'Statistik Relawan' },
 ];
 
 const AdminSidebar = ({ isOpen, onClose }) => {
