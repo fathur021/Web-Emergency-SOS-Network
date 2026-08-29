@@ -145,13 +145,59 @@ async function updateUserAdminService(userId: string, input: IUpdateUserInput) {
   // 5. Sinkronkan status relawan dengan role terbaru:
   //    jadi relawan -> aktif, bukan lagi relawan -> matikan
   updateData.isVolunteerActive =
-    input.role === undefined ? user.isVolunteerActive : input.role === "volunteer";
+    input.role === undefined
+      ? user.isVolunteerActive
+      : input.role === "volunteer";
 
   // 6. Simpan & kembalikan versi TANPA password
-  const updated = await User.findByIdAndUpdate(userId, updateData, { new: true }).select(
-    "-password",
-  );
+  const updated = await User.findByIdAndUpdate(userId, updateData, {
+    new: true,
+  }).select("-password");
   return updated;
+}
+
+async function updateProfileServices(userId: string, nama: string) {
+  const user = await User.findByIdAndUpdate(
+    userId,
+    { nama },
+    { new: true },
+  ).select("-password");
+  if (!user) {
+    throw new AppError(404, "Pengguna tidak ditemukan");
+  }
+  return user;
+}
+async function updatePhotoServices(userId: string, photoPath: string) {
+  const user = await User.findByIdAndUpdate(
+    userId,
+    { photo: photoPath },
+    { new: true },
+  ).select("-password");
+  if (!user) {
+    throw new AppError(404, "Pengguna tidak ditemukan");
+  }
+  return user;
+}
+
+async function changePasswordServices(
+  userId: string,
+  oldPassword: string,
+  newPassword: string,
+) {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AppError(404, "Pengguna tidak ditemukan");
+  }
+  const isMatch = await bcrypt.compare(oldPassword, user.password);
+  if (!isMatch) {
+    throw new AppError(400, "Kata sandi lama salah");
+  }
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  user.password = hashedPassword;
+  await user.save();
+
+  const safeUser = await User.findById(userId).select("-password");
+  return safeUser;
 }
 export {
   getUserByIdService,
@@ -161,5 +207,8 @@ export {
   updateUserStatusServices,
   deleteUserServices,
   createUserService,
-  updateUserAdminService
+  updateUserAdminService,
+  updateProfileServices,
+  updatePhotoServices,
+  changePasswordServices,
 };

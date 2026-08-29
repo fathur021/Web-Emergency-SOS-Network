@@ -129,7 +129,7 @@ const AdminTopBar = ({ onOpenSidebar, pendingCount = 0, inProgressCount = 0, vol
 
                 {/* Menu Profile */}
                 <button
-                  onClick={() => setProfilOpen(false)}
+                  onClick={() => { setProfilOpen(false); navigate('/admin/profil'); }}
                   className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-stone-600 hover:bg-stone-100 hover:text-blue-700 transition cursor-pointer"
                 >
                   <User className="w-4 h-4" />

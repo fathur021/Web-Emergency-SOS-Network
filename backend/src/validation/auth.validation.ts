@@ -1,60 +1,47 @@
 import Joi from "joi";
 import { AppError } from "../error/app.error.js";
 export const registerSchema = Joi.object({
-  nama: Joi.string()
-    .trim()
-    .min(3)
-    .required()
-    .messages({
-      "string.empty": "Nama harus diisi",
-      "string.min": "Nama minimal 3 karakter",
-      "any.required": "Nama harus diisi",
-    }),
+  nama: Joi.string().trim().min(3).required().messages({
+    "string.empty": "Nama harus diisi",
+    "string.min": "Nama minimal 3 karakter",
+    "any.required": "Nama harus diisi",
+  }),
 
-  email: Joi.string()
-    .email()
-    .required()
-    .messages({
-      "string.empty": "Email harus diisi",
-      "string.email": "Format email tidak valid",
-      "any.required": "Email harus diisi",
-    }),
+  email: Joi.string().email().required().messages({
+    "string.empty": "Email harus diisi",
+    "string.email": "Format email tidak valid",
+    "any.required": "Email harus diisi",
+  }),
 
-  password: Joi.string()
-    .min(6)
-    .required()
-    .messages({
-      "string.empty": "Password harus diisi",
-      "string.min": "Password minimal 6 karakter",
-      "any.required": "Password harus diisi",
-    }),
+  password: Joi.string().min(6).required().messages({
+    "string.empty": "Password harus diisi",
+    "string.min": "Password minimal 6 karakter",
+    "any.required": "Password harus diisi",
+  }),
 });
 
 export const loginSchema = Joi.object({
-  email: Joi.string()
-    .email()
-    .required()
-    .messages({
-      "string.empty": "Email harus diisi",
-      "string.email": "Format email tidak valid",
-      "any.required": "Email harus diisi",
-    }),
+  email: Joi.string().email().required().messages({
+    "string.empty": "Email harus diisi",
+    "string.email": "Format email tidak valid",
+    "any.required": "Email harus diisi",
+  }),
 
-  password: Joi.string()
-    .required()
-    .messages({
-      "string.empty": "Password harus diisi",
-      "any.required": "Password harus diisi",
-    }),
+  password: Joi.string().required().messages({
+    "string.empty": "Password harus diisi",
+    "any.required": "Password harus diisi",
+  }),
 });
 
-
 // Helper: menjalankan schema Joi + mengubah error Joi menjadi AppError 400.
-async function validateWith<T>(schema: Joi.ObjectSchema<T>, data: unknown): Promise<T> {
+async function validateWith<T>(
+  schema: Joi.ObjectSchema<T>,
+  data: unknown,
+): Promise<T> {
   try {
     // abortEarly: false => kumpulkan SEMUA error sekaligus, bukan berhenti di error pertama
     // stripUnknown: true  => BUANG field yang tidak ada di schema (misal "role" saat register)
-    const  value  = await schema.validateAsync(data, {
+    const value = await schema.validateAsync(data, {
       abortEarly: false,
       stripUnknown: true,
     });
@@ -67,41 +54,28 @@ async function validateWith<T>(schema: Joi.ObjectSchema<T>, data: unknown): Prom
 }
 
 export const createUserSchema = Joi.object({
-  nama: Joi.string()
-    .trim()
-    .min(3)
-    .required()
-    .messages({
-      "string.empty": "Nama harus diisi",
-      "string.min": "Nama minimal 3 karakter",
-      "any.required": "Nama harus diisi",
-    }),
+  nama: Joi.string().trim().min(3).required().messages({
+    "string.empty": "Nama harus diisi",
+    "string.min": "Nama minimal 3 karakter",
+    "any.required": "Nama harus diisi",
+  }),
 
-  email: Joi.string()
-    .email()
-    .required()
-    .messages({
-      "string.empty": "Email harus diisi",
-      "string.email": "Format email tidak valid",
-      "any.required": "Email harus diisi",
-    }),
+  email: Joi.string().email().required().messages({
+    "string.empty": "Email harus diisi",
+    "string.email": "Format email tidak valid",
+    "any.required": "Email harus diisi",
+  }),
 
-  password: Joi.string()
-    .min(6)
-    .required()
-    .messages({
-      "string.empty": "Password harus diisi",
-      "string.min": "Password minimal 6 karakter",
-      "any.required": "Password harus diisi",
-    }),
+  password: Joi.string().min(6).required().messages({
+    "string.empty": "Password harus diisi",
+    "string.min": "Password minimal 6 karakter",
+    "any.required": "Password harus diisi",
+  }),
 
-  role: Joi.string()
-    .valid("user", "volunteer", "admin")
-    .required()
-    .messages({
-      "any.only": "Role harus user, volunteer, atau admin",
-      "any.required": "Role harus dipilih",
-    }),
+  role: Joi.string().valid("user", "volunteer", "admin").required().messages({
+    "any.only": "Role harus user, volunteer, atau admin",
+    "any.required": "Role harus dipilih",
+  }),
 });
 
 // Semua field OPSIONAL, tapi minimal satu harus diisi (.min(1)).
@@ -115,11 +89,9 @@ export const updateUserSchema = Joi.object({
     "string.email": "Format email tidak valid",
   }),
 
-  role: Joi.string()
-    .valid("user", "volunteer", "admin")
-    .messages({
-      "any.only": "Role harus user, volunteer, atau admin",
-    }),
+  role: Joi.string().valid("user", "volunteer", "admin").messages({
+    "any.only": "Role harus user, volunteer, atau admin",
+  }),
 
   password: Joi.string().min(6).allow("").messages({
     "string.min": "Password minimal 6 karakter",
@@ -129,5 +101,26 @@ export const updateUserSchema = Joi.object({
   .messages({
     "object.min": "Tidak ada data yang diubah",
   });
+
+export const updateProfileSchema = Joi.object({
+  nama: Joi.string().trim().min(3).required().messages({
+    "string.empty": "Nama harus di isi",
+    "string.min": "Nama minimal 3 karakter",
+    "any.required": "Nama wajib di isi",
+  }),
+});
+// Schema untuk ganti password
+export const changePasswordSchema = Joi.object({
+  oldPassword: Joi.string().required().messages({
+    "string.empty": "Kata sandi lama harus diisi",
+    "any.required": "Kata sandi lama harus diisi",
+  }),
+
+  newPassword: Joi.string().min(6).required().messages({
+    "string.empty": "Kata sandi baru harus diisi",
+    "string.min": "Kata sandi baru minimal 6 karakter",
+    "any.required": "Kata sandi baru harus diisi",
+  }),
+});
 
 export { validateWith };

@@ -135,8 +135,31 @@ export const sosApi = createApi({
     }),
     getSosStatistic: builder.query({
       query: () => "/sos/statistics",
-      providesTags: ["Sos"]
-    })
+      providesTags: ["Sos"],
+    }),
+    updateProfile: builder.mutation({
+      query: (body) => ({
+        url: "/user/profile",
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    updatePhoto: builder.mutation({
+      query: (formData) => ({
+        url: "/user/photo",
+        method: "PATCH",
+        body: formData,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    changePassword: builder.mutation({
+      query: (body) => ({
+        url: "/user/password",
+        method: "PATCH",
+        body,
+      }),
+    }),
   }),
 });
 
@@ -155,4 +178,7 @@ export const {
   useUpdateUserMutation,
   useDeleteSosMutation,
   useGetSosStatisticQuery,
+  useUpdateProfileMutation,
+  useUpdatePhotoMutation,
+  useChangePasswordMutation,
 } = sosApi;

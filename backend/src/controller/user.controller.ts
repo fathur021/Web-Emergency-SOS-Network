@@ -7,11 +7,22 @@ import {
   updateUserStatusServices,
   deleteUserServices,
   updateUserAdminService,
-  createUserService
+  createUserService,
+  updateProfileServices,
+  updatePhotoServices,
+  changePasswordServices,
 } from "../services/user.services.js";
-import { createUserSchema, updateUserSchema, validateWith } from "../validation/auth.validation.js";
-import type { ICreateUserInput, IUpdateUserInput } from "../interface/user.interface.js";
-
+import {
+  createUserSchema,
+  updateUserSchema,
+  updateProfileSchema,
+  changePasswordSchema,
+  validateWith,
+} from "../validation/auth.validation.js";
+import type {
+  ICreateUserInput,
+  IUpdateUserInput,
+} from "../interface/user.interface.js";
 
 async function getProfileController(req: Request, res: Response) {
   const userId = req.user!._id.toString(); // Use the authenticated user's ID
@@ -105,7 +116,10 @@ async function deleteUserController(
 // Admin membuat akun baru lengkap dengan rolenya.
 async function createUserController(req: Request, res: Response) {
   // Gagal validasi -> validateWith melempar AppError 400 otomatis
-  const input = await validateWith<ICreateUserInput>(createUserSchema, req.body);
+  const input = await validateWith<ICreateUserInput>(
+    createUserSchema,
+    req.body,
+  );
 
   const user = await createUserService(input);
 
@@ -119,11 +133,17 @@ async function createUserController(req: Request, res: Response) {
 
 // ---- PATCH /api/user/:id ----
 // Admin mengubah sebagian data pengguna (nama/email/role/password).
-async function updateUserController(req: Request<{ id: string }>, res: Response) {
+async function updateUserController(
+  req: Request<{ id: string }>,
+  res: Response,
+) {
   const { id } = req.params;
 
   // Gagal validasi -> validateWith melempar AppError 400 otomatis
-  const input = await validateWith<IUpdateUserInput>(updateUserSchema, req.body);
+  const input = await validateWith<IUpdateUserInput>(
+    updateUserSchema,
+    req.body,
+  );
 
   const user = await updateUserAdminService(id, input);
 
@@ -133,6 +153,53 @@ async function updateUserController(req: Request<{ id: string }>, res: Response)
     data: user,
   });
 }
+
+async function updateProfileController(req: Request, res: Response) {
+  const userId = req.user!._id.toString();
+  const input = await validateWith<{ nama: string }>(
+    updateProfileSchema,
+    req.body,
+  );
+  const profile = await updateProfileServices(userId, input.nama);
+
+  return res.status(200).json({
+    status: "success",
+    message: "Profile Berhasil di Update",
+    data: profile,
+  });
+}
+async function updatePhotoController(req:Request, res:Response){
+  const userId = req.user!._id.toString();
+  if(!req.file){
+    return res.status(400).json({
+      status:"fail",
+      message:"File foto wajib di unggah"
+    })
+  }
+  const photoPath = `/uploads/${req.file.filename}`;
+  const profile = await updatePhotoServices(userId, photoPath);
+
+  return res.status(200).json({
+    status: "Success",
+    message:"Foto berhasil di perbarui",
+    data:profile,
+  })
+}
+
+async function changePasswordController(req:Request, res:Response){
+  const userId = req.user!._id.toString();
+  const input = await validateWith<{oldPassword:string, newPassword:string}>(changePasswordSchema, req.body);
+
+  const profile = await changePasswordServices(
+    userId, input.oldPassword, input.newPassword
+  )
+  return res.status(200).json({
+    status: "Success",
+    message: "Password Berhasil di ganti",
+    data: profile
+  })
+}
+
 export {
   getProfileController,
   getAllUsersController,
@@ -141,5 +208,8 @@ export {
   updateUserStatusController,
   deleteUserController,
   createUserController,
-  updateUserController
+  updateUserController,
+  updateProfileController,
+  updatePhotoController,
+  changePasswordController
 };

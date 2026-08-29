@@ -12,6 +12,9 @@ import VolunterLayouts from './layouts/VolunterLayouts.jsx'
 import AdminLayout from './layouts/AdminLayout.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import StatistikRelawan from './pages/StatistikRelawan.jsx'
+import Profile from './pages/Profile.jsx'
+
+
 const App = () => {
   return (
     <BrowserRouter>
@@ -21,12 +24,18 @@ const App = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
 
+        {/* Route profil: bisa diakses semua user yang sudah login (role apapun) */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/profil" element={<Profile />} />
+        </Route>
+
         {/* Route relawan: wajib login dengan role volunteer */}
         <Route element={<ProtectedRoute allowedRoles={['volunteer']} />}>
           <Route path="/volunteer" element={<VolunterLayouts />}>
             <Route index element={<Volunteer />} />
             <Route path="riwayat" element={<RiwayatBantuan />} />
             <Route path="pengaturan-radius" element={<PengaturanRadius />} />
+            <Route path="profil" element={<Profile />} />
           </Route>
         </Route>
 
@@ -36,7 +45,8 @@ const App = () => {
             <Route index element={<AdminDashboard />} />
             <Route path="pengguna" element={<KelolaPengguna />} />
             <Route path="riwayat-laporan" element={<RiwayatLaporan />} />
-            <Route path="statistik-relawan" element={<StatistikRelawan/>}/>
+            <Route path="statistik-relawan" element={<StatistikRelawan />} />
+            <Route path="profil" element={<Profile />} />
           </Route>
         </Route>
       </Routes>

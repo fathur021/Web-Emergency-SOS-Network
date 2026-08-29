@@ -8,6 +8,7 @@ export interface IUser {
     locationName : string;
     radius : number;
     isVolunteerActive : boolean;
+    photo : string;
 }
 
 export interface ICreateUserInput{

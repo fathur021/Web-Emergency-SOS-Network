@@ -95,7 +95,13 @@ const Navbar = () => {
 
                   {/* Menu Profile */}
                   <button
-                    onClick={() => setProfilOpen(false)}
+                    onClick={() => {
+                      setProfilOpen(false);
+                      let profilPath = '/profil';
+                      if (user?.role === 'admin') profilPath = '/admin/profil';
+                      else if (user?.role === 'volunteer') profilPath = '/volunteer/profil';
+                      navigate(profilPath);
+                    }}
                     className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-stone-600 hover:bg-stone-100 hover:text-red-600 transition cursor-pointer"
                   >
                     <User className="w-4 h-4" />
