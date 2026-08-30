@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../redux/authSlice';
 import { useGetProfileQuery } from '../redux/api/sos.Api';
+import { getImageUrl } from '../config/api';
 import { konfirmasiLogout } from '../utils/alert';
 
 const Navbar = () => {
@@ -22,6 +23,7 @@ const Navbar = () => {
     skip: !hasToken,
   });
   const locationName = profileData?.data?.locationName;
+  const photo = profileData?.data?.photo;
 
   const handleLogout = async () => {
     const result = await konfirmasiLogout();
@@ -63,9 +65,13 @@ const Navbar = () => {
               className="flex items-center gap-2 pl-1 pr-2.5 py-1.5 rounded-full bg-surface/80 border border-stone-200 hover:bg-stone-100 transition cursor-pointer"
               title="Menu profil"
             >
-              {/* Avatar */}
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-orange-500 text-white text-xs font-extrabold uppercase flex items-center justify-center ring-2 ring-white shrink-0">
-                {user?.nama?.charAt(0) || 'U'}
+              {/* Avatar: tampil foto kalau ada, kalau tidak pakai inisial */}
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-orange-500 text-white text-xs font-extrabold uppercase flex items-center justify-center ring-2 ring-white shrink-0 overflow-hidden">
+                {photo ? (
+                  <img src={getImageUrl(photo)} alt="Foto profil" className="w-full h-full object-cover" />
+                ) : (
+                  user?.nama?.charAt(0) || 'U'
+                )}
               </div>
               <div className="hidden sm:flex flex-col items-start leading-tight text-left">
                 <p className="text-xs font-bold text-stone-900 max-w-[120px] truncate">{user.nama}</p>

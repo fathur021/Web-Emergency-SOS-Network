@@ -3,6 +3,8 @@ import { Menu, Bell, ChevronDown, User, LogOut, Clock3, Radio, HeartHandshake } 
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../redux/authSlice';
+import { useGetProfileQuery } from '../redux/api/sos.Api';
+import { getImageUrl } from '../config/api';
 import { konfirmasiLogout } from '../utils/alert';
 
 const StatChip = ({ icon: Icon, count, label, chipClass }) => (
@@ -22,6 +24,10 @@ const AdminTopBar = ({ onOpenSidebar, pendingCount = 0, inProgressCount = 0, vol
 
   // Ambil data admin yang sedang login dari Redux
   const user = useSelector((state) => state.auth.user);
+
+  // Data fresh dari server (termasuk foto profil yang baru di-upload)
+  const { data: profileData } = useGetProfileQuery();
+  const photo = profileData?.data?.photo;
 
   // State buka/tutup dropdown profil admin
   const [profilOpen, setProfilOpen] = useState(false);
@@ -97,9 +103,13 @@ const AdminTopBar = ({ onOpenSidebar, pendingCount = 0, inProgressCount = 0, vol
             className="flex items-center gap-2 pl-1 pr-2.5 py-1.5 rounded-xl bg-surface border border-stone-200 shadow-neo-sm hover:bg-stone-100 transition cursor-pointer"
             title="Menu profil"
           >
-            {/* Avatar: nanti diganti foto dari file avatar saat upload sudah ada */}
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 text-white text-xs font-extrabold uppercase flex items-center justify-center ring-2 ring-white shrink-0">
-              {user?.nama?.charAt(0) || 'A'}
+            {/* Avatar: tampil foto kalau ada, kalau tidak pakai inisial */}
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 text-white text-xs font-extrabold uppercase flex items-center justify-center ring-2 ring-white shrink-0 overflow-hidden">
+              {photo ? (
+                <img src={getImageUrl(photo)} alt="Foto profil" className="w-full h-full object-cover" />
+              ) : (
+                user?.nama?.charAt(0) || 'A'
+              )}
             </div>
             <div className="hidden lg:flex flex-col items-start leading-tight text-left">
               <p className="text-xs font-bold text-stone-900 max-w-[120px] truncate">{user?.nama}</p>
