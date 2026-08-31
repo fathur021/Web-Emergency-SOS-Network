@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
   User,
@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 import { getImageUrl } from "../config/api";
+import { setCredentials } from "../redux/authSlice";
 import {
   useGetProfileQuery,
   useUpdateProfileMutation,
@@ -25,6 +26,8 @@ import {
 
 const Profile = () => {
   const navigate = useNavigate();
+  // userFromRedux = data user dari Redux/localStorage (fallback saat cache
+  // getProfile belum tersedia). Deklarasi SEBELUM dipakai di bawah.
   const userFromRedux = useSelector((state) => state.auth.user);
   const { data: profileData } = useGetProfileQuery();
   const user = profileData?.data || userFromRedux;
@@ -42,7 +45,9 @@ const Profile = () => {
       {/* Tampilkan Navbar jika diakses oleh user biasa */}
       {isRegularUser && <Navbar />}
 
-      <div className={`w-full p-4 md:p-6 pb-24 md:pb-32 space-y-6 ${isRegularUser ? "pt-28" : ""}`}>
+      <div
+        className={`w-full p-4 md:p-6 pb-24 md:pb-32 space-y-6 ${isRegularUser ? "pt-28" : ""}`}
+      >
         {/* Header & Back Button */}
         <div className="flex items-center gap-3">
           <button
@@ -53,7 +58,9 @@ const Profile = () => {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h2 className="text-lg font-bold text-stone-900">Pengaturan Profil</h2>
+            <h2 className="text-lg font-bold text-stone-900">
+              Pengaturan Profil
+            </h2>
             <p className="text-xs text-stone-500">
               Kelola data pribadi, foto profil, dan kata sandi akun Anda.
             </p>
@@ -69,9 +76,28 @@ const Profile = () => {
 };
 
 const ProfileForm = ({ user }) => {
-  const [updateProfile, { isLoading: savingProfile }] = useUpdateProfileMutation();
+  // useDispatch -> pengirim action Redux, dipakai untuk memanggil setCredentials
+  const dispatch = useDispatch();
+  // userFromRedux -> data user lama (untuk digabung dengan data terbaru)
+  const userFromRedux = useSelector((state) => state.auth.user);
+
+  // refreshAuthUser -> menulis ulang Redux + localStorage dengan data user
+  // terbaru dari backend, sehingga semua komponen tetap konsisten & tahan refresh
+  const refreshAuthUser = (freshUser) => {
+    const merged = { ...userFromRedux, ...freshUser };
+    dispatch(
+      setCredentials({
+        token: localStorage.getItem("token"),
+        user: merged,
+      }),
+    );
+  };
+
+  const [updateProfile, { isLoading: savingProfile }] =
+    useUpdateProfileMutation();
   const [updatePhoto, { isLoading: savingPhoto }] = useUpdatePhotoMutation();
-  const [changePassword, { isLoading: savingPassword }] = useChangePasswordMutation();
+  const [changePassword, { isLoading: savingPassword }] =
+    useChangePasswordMutation();
 
   // Form States - Data Diri (dipakai sebagai nilai awal, lalu diisi user)
   const [nama, setNama] = useState(user?.nama || "");
@@ -112,7 +138,9 @@ const ProfileForm = ({ user }) => {
     }
 
     try {
-      await updateProfile({ nama }).unwrap();
+      const result = await updateProfile({ nama }).unwrap();
+      // Perbarui Redux + localStorage dengan nama terbaru
+      refreshAuthUser(result.data);
       setSuccessMsg("Profil berhasil diperbarui!");
       setTimeout(() => setSuccessMsg(""), 3000);
     } catch (err) {
@@ -130,7 +158,9 @@ const ProfileForm = ({ user }) => {
     formData.append("photo", selectedImage);
 
     try {
-      await updatePhoto(formData).unwrap();
+      const result = await updatePhoto(formData).unwrap();
+      // Perbarui Redux + localStorage dengan foto terbaru
+      refreshAuthUser(result.data);
       setSuccessMsg("Foto profil berhasil diunggah!");
       setSelectedImage(null);
       setPreviewUrl(null);
@@ -257,7 +287,10 @@ const ProfileForm = ({ user }) => {
       {/* ---------------------------------------------------- */}
       {/* 2. BAGIAN DATA DIRI */}
       {/* ---------------------------------------------------- */}
-      <form onSubmit={handleSaveProfile} className="p-5 bg-surface border border-stone-200 rounded-2xl shadow-neo-sm space-y-4 w-full">
+      <form
+        onSubmit={handleSaveProfile}
+        className="p-5 bg-surface border border-stone-200 rounded-2xl shadow-neo-sm space-y-4 w-full"
+      >
         <h3 className="text-sm font-bold text-stone-900 flex items-center gap-2">
           <User className="w-4 h-4 text-stone-700" />
           Data Diri
@@ -332,7 +365,10 @@ const ProfileForm = ({ user }) => {
       {/* ---------------------------------------------------- */}
       {/* 3. BAGIAN GANTI SANDI */}
       {/* ---------------------------------------------------- */}
-      <form onSubmit={handleChangePassword} className="p-5 bg-surface border border-stone-200 rounded-2xl shadow-neo-sm space-y-4 w-full">
+      <form
+        onSubmit={handleChangePassword}
+        className="p-5 bg-surface border border-stone-200 rounded-2xl shadow-neo-sm space-y-4 w-full"
+      >
         <h3 className="text-sm font-bold text-stone-900 flex items-center gap-2">
           <Key className="w-4 h-4 text-stone-700" />
           Ganti Kata Sandi
@@ -398,7 +434,9 @@ const ProfileForm = ({ user }) => {
             className="flex items-center gap-2 px-4 py-2.5 bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs rounded-xl shadow-neo-sm cursor-pointer transition disabled:opacity-50"
           >
             <Key className="w-4 h-4" />
-            <span>{savingPassword ? "Menyimpan..." : "Perbarui Kata Sandi"}</span>
+            <span>
+              {savingPassword ? "Menyimpan..." : "Perbarui Kata Sandi"}
+            </span>
           </button>
         </div>
       </form>

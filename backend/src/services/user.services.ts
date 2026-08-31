@@ -72,7 +72,7 @@ async function getVolunteersService() {
     latitude: { $ne: null },
     longitude: { $ne: null },
     isVolunteerActive: true,
-  }).select("nama latitude longitude locationName radius isVolunteerActive");
+  }).select("nama photo latitude longitude locationName radius isVolunteerActive");
   return volunteers;
 }
 

@@ -55,7 +55,7 @@ const Login = () => {
       // err.data.message berasal dari errorHandler backend:
       // { status: "error", message: "Email atau password salah" }
       console.error('Login gagal:', err?.data?.message);
-      alert(err?.data?.message || 'Login gagal');
+      
     }
   };
 

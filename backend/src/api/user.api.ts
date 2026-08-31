@@ -13,7 +13,7 @@ import {
   changePasswordController,
 } from "../controller/user.controller.js";
 import { authenticate, requireRole } from "../middleware/auth.middleware.js";
-import { upload } from "../utils/upload.utils.js"; 
+import { uploadProfile } from "../utils/upload.utils.js"; 
 
 const router = express.Router();
 
@@ -24,7 +24,7 @@ router.use(authenticate);
 // akan dianggap sebagai parameter id -> Cast to ObjectId failed.
 router.get("/profile", getProfileController);
 router.patch("/profile", updateProfileController);          // <-- update nama
-router.patch("/photo", upload.single("photo"), updatePhotoController); // <-- upload foto
+router.patch("/photo", uploadProfile.single("photo"), updatePhotoController); // <-- upload foto
 router.patch("/password", changePasswordController);        // <-- ganti sandi
 router.get("/volunteers", getVolunteersController);
 router.patch("/location", updateLocationController);

@@ -19,10 +19,9 @@ import {
   changePasswordSchema,
   validateWith,
 } from "../validation/auth.validation.js";
-import type {
-  ICreateUserInput,
-  IUpdateUserInput,
-} from "../interface/user.interface.js";
+import type { ICreateUserInput, IUpdateUserInput } from "../interface/user.interface.js";
+import { User } from "../model/user.model.js";
+import { deleteUploadedFile } from "../utils/upload.utils.js";
 
 async function getProfileController(req: Request, res: Response) {
   const userId = req.user!._id.toString(); // Use the authenticated user's ID
@@ -176,6 +175,11 @@ async function updatePhotoController(req:Request, res:Response){
       message:"File foto wajib di unggah"
     })
   }
+
+  // Ambil foto lama dari user (sebelum diganti) untuk dihapus dari disk
+  const existing = await User.findById(userId).select("photo");
+  deleteUploadedFile(existing?.photo);
+
   const photoPath = `/uploads/${req.file.filename}`;
   const profile = await updatePhotoServices(userId, photoPath);
 

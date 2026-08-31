@@ -22,6 +22,7 @@ import {
 } from "../redux/api/sos.Api";
 import { konfirmasiHapus, popupSukses, popupGagal } from "../utils/alert";
 import FormPenggunaModal from "../components/FormPenggunaModal";
+import { getImageUrl } from "../config/api";
 const roleLabel = { user: "Warga", volunteer: "Relawan", admin: "Admin" };
 
 const formatTanggal = (iso) => {
@@ -71,6 +72,7 @@ const KelolaPengguna = () => {
             : "Nonaktif"
           : "Aktif",
       email: u.email,
+      photo: u.photo, // path foto profil (dari backend), dipakai di avatar
       locationName: u.locationName || "",
       joined: formatTanggal(u.createdAt),
       reports: sosList.filter(
@@ -262,8 +264,16 @@ const KelolaPengguna = () => {
               className="p-4 bg-surface border border-stone-200 rounded-xl shadow-neo-sm hover:border-stone-300 transition"
             >
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-400 font-bold flex items-center justify-center shrink-0">
-                  {u.name.charAt(0)}
+                <div className="w-10 h-10 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-400 font-bold flex items-center justify-center shrink-0 overflow-hidden">
+                  {u.photo ? (
+                    <img
+                      src={getImageUrl(u.photo)}
+                      alt={`Foto ${u.name}`}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    u.name.charAt(0)
+                  )}
                 </div>
 
                 <div className="flex-1 min-w-0">
