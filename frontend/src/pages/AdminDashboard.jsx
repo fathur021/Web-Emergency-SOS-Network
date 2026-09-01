@@ -1,22 +1,41 @@
-import React from 'react';
 import { useOutletContext } from 'react-router-dom';
 import MapView from '../components/MapContainer';
 import { getImageUrl } from '../config/api';
 
+const getTodayWIB = () =>{
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "Asia/Jakarta",
+  }).formatToParts(new Date());
+  const day = parts.find((p) => p.type === "day")?.value;
+  const month = parts.find((p) => p.type === "month")?.value;
+  const year = parts.find((p) => p.type === "year")?.value;
+  return `${day}/${month}/${year}`;
+}
+
 const AdminDashboard = () => {
   const { incidents, volunteers } = useOutletContext();
+
+  const todayStr = getTodayWIB();
+  const todayIncidents = incidents.filter((item) => item.time.startsWith(todayStr));
 
   return (
     <>
       {/* Live Incident Feed Panel */}
       <section className="w-full md:w-80 border-r border-stone-200 bg-surface/50 flex flex-col shrink-0">
-        <div className="p-4 border-b border-stone-200 flex justify-between items-center">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-stone-500">Live Incident Feed</h3>
-          <span className="text-[10px] bg-stone-200 text-stone-600 px-2 py-0.5 rounded-full font-mono">Real-time</span>
+        <div className="p-4 border-b border-stone-200 flex justify-between items-center gap-2">
+          <div className="min-w-0">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-stone-500">Live Incident Feed</h3>
+            <p className="text-[10px] text-stone-400 mt-0.5">Hari ini · {todayStr.replaceAll("/", "-")}</p>
+          </div>
+          <span className="text-[10px] bg-stone-200 text-stone-600 px-2 py-0.5 rounded-full font-mono shrink-0">Real-time</span>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
-          {incidents.map((item) => (
+          
+          {todayIncidents.map((item) => (
             <div 
               key={item.id} 
               className={`p-3.5 rounded-xl border space-y-2 transition cursor-pointer hover:border-stone-300 ${
