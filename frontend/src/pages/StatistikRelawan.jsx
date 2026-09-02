@@ -7,15 +7,37 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { useGetSosStatisticQuery } from "../redux/api/sos.Api";
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+} from "recharts";
 
 const StatistikRelawan = () => {
   const { data, isLoading, isError, error } = useGetSosStatisticQuery();
 
-  // Data respons: { status, message, data: { ranking, summary } }
+  // Data respons: { status, message, data: { ranking, summary, trend } }
   const ranking = data?.data?.ranking || [];
   const summary = data?.data?.summary || {};
   const podium = ranking.slice(0, 3);
   const tabel = ranking;
+  const trend = data?.data?.trend || [];
+
+  // Format label tanggal sumbu X: "2026-08-31" → "31 Agu"
+  // Buat grafik lebih mudah dibaca dibanding "08-31" (bulan-tanggal membingungkan).
+  const formatTanggalShort = (iso) => {
+    const [, month, day] = (iso || "").split("-"); // ["2026","08","31"]
+    const namaBulan = {
+      "01": "Jan", "02": "Feb", "03": "Mar", "04": "Apr",
+      "05": "Mei", "06": "Jun", "07": "Jul", "08": "Agu",
+      "09": "Sep", "10": "Okt", "11": "Nov", "12": "Des",
+    };
+    return `${day} ${namaBulan[month] || month}`;
+  };
 
   // State loading
   if (isLoading) {
@@ -47,7 +69,6 @@ const StatistikRelawan = () => {
   }
 
   // Urutan podium di layar: juara 2 (kiri) → juara 1 (tengah) → juara 3 (kanan)
-  // Urutan array podium = [1, 2, 3], jadi kita susun ulang menjadi [2, 1, 3].
   const urutanPodium = [podium[1], podium[0], podium[2]].filter(Boolean);
 
   // Definisi medali berdasarkan posisi di urutanPodium (idx 0 = perak, 1 = emas, 2 = perunggu)
@@ -59,7 +80,7 @@ const StatistikRelawan = () => {
 
   return (
     <div className="flex-1 overflow-y-auto">
-      <div className="max-w-5xl mx-auto p-4 md:p-6 space-y-5">
+      <div className="max-w-5xl mx-auto p-4 md:p-6 space-y-6">
         {/* Header */}
         <div>
           <h2 className="text-lg font-bold text-stone-900">Statistik Relawan</h2>
@@ -70,27 +91,87 @@ const StatistikRelawan = () => {
 
         {/* Kartu Ringkasan */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="p-4 bg-surface border border-emerald-500/30 rounded-xl shadow-neo-sm">
+          <div className="p-4 bg-surface border border-emerald-500/30 rounded-2xl shadow-neo-sm">
             <div className="flex items-center gap-2 text-emerald-400">
               <Trophy className="w-4 h-4" />
               <p className="text-[10px] uppercase tracking-wider font-semibold">SOS Selesai</p>
             </div>
-            <p className="text-2xl font-bold text-emerald-400 mt-1">{summary.totalResolved ?? 0}</p>
+            <p className="text-3xl font-bold text-stone-900 mt-2">{summary.totalResolved ?? 0}</p>
           </div>
-          <div className="p-4 bg-surface border border-stone-200 rounded-xl shadow-neo-sm">
+          <div className="p-4 bg-surface border border-stone-200 rounded-2xl shadow-neo-sm">
             <div className="flex items-center gap-2 text-blue-600">
               <FileText className="w-4 h-4" />
               <p className="text-[10px] uppercase tracking-wider font-semibold">Total Laporan</p>
             </div>
-            <p className="text-2xl font-bold text-stone-900 mt-1">{summary.totalLaporan ?? 0}</p>
+            <p className="text-3xl font-bold text-stone-900 mt-2">{summary.totalLaporan ?? 0}</p>
           </div>
-          <div className="p-4 bg-surface border border-stone-200 rounded-xl shadow-neo-sm">
+          <div className="p-4 bg-surface border border-stone-200 rounded-2xl shadow-neo-sm">
             <div className="flex items-center gap-2 text-stone-500">
               <Users className="w-4 h-4" />
               <p className="text-[10px] uppercase tracking-wider font-semibold">Relawan Aktif</p>
             </div>
-            <p className="text-2xl font-bold text-stone-900 mt-1">{summary.totalVolunteer ?? 0}</p>
+            <p className="text-3xl font-bold text-stone-900 mt-2">{summary.totalVolunteer ?? 0}</p>
           </div>
+        </div>
+
+        {/* Grafik Tren SOS per Hari */}
+        <div className="p-4 md:p-6 bg-surface border border-stone-200 rounded-2xl shadow-neo-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-blue-600" />
+              <h3 className="text-sm font-bold text-stone-900">Tren SOS 7 Hari Terakhir</h3>
+            </div>
+            {trend.length > 0 && (
+              <span className="text-[10px] bg-stone-100 text-stone-500 px-2 py-0.5 rounded-full font-mono">
+                {trend.length} hari
+              </span>
+            )}
+          </div>
+
+          {trend.length > 0 ? (
+            <div className="h-60 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={trend} margin={{ top: 5, right: 10, left: -16, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 11, fill: "#a8a29e" }}
+                    tickFormatter={formatTanggalShort} // "2026-08-31" → "31 Agu"
+                    tickLine={false}
+                    axisLine={{ stroke: "#e7e5e4" }}
+                  />
+                  <YAxis
+                    allowDecimals={false}
+                    tick={{ fontSize: 11, fill: "#a8a29e" }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <Tooltip
+                    formatter={(value) => [`${value} SOS`, "Jumlah"]}
+                    labelFormatter={formatTanggalShort}
+                    contentStyle={{
+                      borderRadius: 12,
+                      border: "1px solid #e7e5e4",
+                      fontSize: 12,
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="total"
+                    stroke="#2563eb"
+                    strokeWidth={2.5}
+                    dot={{ r: 3, fill: "#2563eb", strokeWidth: 0 }}
+                    activeDot={{ r: 5 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <p className="text-sm text-stone-500 font-semibold text-center py-8">
+              Belum ada data SOS dalam 7 hari terakhir
+            </p>
+          )}
         </div>
 
         {/* Podium 3 Terbaik */}

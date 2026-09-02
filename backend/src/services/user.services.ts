@@ -66,6 +66,23 @@ async function updateUserStatusServices(
   return user;
 }
 
+async function toggleMyStatusService(userId: string) {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AppError(404, "Pengguna tidak ditemukan");
+  }
+  if (user.role !== "volunteer") {
+    throw new AppError(400, "Hanya relawan yang bisa mengubah status aktif");
+  }
+
+  const updated = await User.findByIdAndUpdate(
+    userId,
+    { isVolunteerActive: !user.isVolunteerActive },
+    { new: true },
+  ).select("-password");
+  return updated;
+}
+
 async function getVolunteersService() {
   const volunteers = await User.find({
     role: "volunteer",
@@ -205,6 +222,7 @@ export {
   updateLocationService,
   getVolunteersService,
   updateUserStatusServices,
+  toggleMyStatusService,
   deleteUserServices,
   createUserService,
   updateUserAdminService,

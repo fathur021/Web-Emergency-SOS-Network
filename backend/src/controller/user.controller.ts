@@ -11,6 +11,7 @@ import {
   updateProfileServices,
   updatePhotoServices,
   changePasswordServices,
+  toggleMyStatusService,
 } from "../services/user.services.js";
 import {
   createUserSchema,
@@ -97,6 +98,17 @@ async function getVolunteersController(req: Request, res: Response) {
     status: "success",
     message: "Berhasil mendapatkan data relawan",
     data: volunteers,
+  });
+}
+
+async function toggleMyStatusController(req: Request, res: Response) {
+  const userId = req.user!._id.toString();
+  const user = await toggleMyStatusService(userId);
+
+  return res.status(200).json({
+    status: "success",
+    message: "Status aktif relawan berhasil diperbarui",
+    data: user,
   });
 }
 async function deleteUserController(
@@ -210,6 +222,7 @@ export {
   updateLocationController,
   getVolunteersController,
   updateUserStatusController,
+  toggleMyStatusController,
   deleteUserController,
   createUserController,
   updateUserController,

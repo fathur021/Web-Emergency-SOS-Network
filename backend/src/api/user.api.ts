@@ -5,6 +5,7 @@ import {
   updateLocationController,
   getVolunteersController,
   updateUserStatusController,
+  toggleMyStatusController,
   deleteUserController,
   createUserController,
   updateUserController,
@@ -29,6 +30,7 @@ router.patch("/password", changePasswordController);        // <-- ganti sandi
 router.get("/volunteers", getVolunteersController);
 router.patch("/location", updateLocationController);
 router.get("/all", requireRole("admin"), getAllUsersController);
+router.patch("/status", toggleMyStatusController);
 
 // ---- Lalu route dengan parameter dinamis ":id" ----
 router.patch("/:id/status", requireRole("admin"), updateUserStatusController);

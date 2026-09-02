@@ -234,6 +234,36 @@ async function getStatisticsSummaryServices(days = 30) {
   };
 }
 
+//Menghitung JUMLAH SOS yang masuk PER HARI dalam beberapa hari terakhir
+async function getSosTrendServices(days = 7) {
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+  const trend = await Sos.aggregate([
+    { $match: { createdAt: { $gte: since } } },
+    {
+      $group: {
+        _id: {
+          $dateToString: {
+            format: "%Y-%m-%d",
+            date: "$createdAt",
+            timezone: "Asia/Jakarta",
+          },
+        },
+        total: { $sum: 1 },
+      },
+    },
+    { $sort: { _id: 1 } },
+    {
+      $project: {
+        _id: 0,
+        date: "$_id",
+        total: 1,
+      },
+    },
+  ]);
+  return trend;
+}
+
 export {
   createSosServices,
   getAllSosServices,
@@ -244,4 +274,5 @@ export {
   deleteSosServices,
   getBestVolunteerServices,
   getStatisticsSummaryServices,
+  getSosTrendServices,
 };

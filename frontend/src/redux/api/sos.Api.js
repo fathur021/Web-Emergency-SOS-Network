@@ -160,6 +160,14 @@ export const sosApi = createApi({
         body,
       }),
     }),
+
+    toggleMyStatus: builder.mutation({
+      query: () => ({
+        url: "/user/status",
+        method: "PATCH",
+      }),
+      invalidatesTags: ["User", "Volunteer"],
+    }),
   }),
 });
 
@@ -181,4 +189,5 @@ export const {
   useUpdateProfileMutation,
   useUpdatePhotoMutation,
   useChangePasswordMutation,
+  useToggleMyStatusMutation,
 } = sosApi;

@@ -8,6 +8,7 @@ import {
   useGetAllSosQuery,
   useUpdateSosStatusMutation,
   useGetProfileQuery,
+  useToggleMyStatusMutation,
 } from '../redux/api/sos.Api';
 import { getImageUrl } from '../config/api';
 
@@ -28,6 +29,7 @@ const VolunteerTopBar = ({ isOnline, setIsOnline, onOpenSidebar }) => {
   const photo = profileData?.data?.photo;
   const { data } = useGetAllSosQuery();
   const [updateSosStatus] = useUpdateSosStatusMutation();
+  const [toggleMyStatus] = useToggleMyStatusMutation();
 
   const allSos = data?.data || [];
 
@@ -53,6 +55,15 @@ const VolunteerTopBar = ({ isOnline, setIsOnline, onOpenSidebar }) => {
 
   // BATALKAN → lepas tanggung jawab, SOS kembali pending
   const handleCancel = (id) => runStatus(id, 'pending');
+
+  const handleToggleStatus = async () => {
+    try {
+      await toggleMyStatus().unwrap();
+      setIsOnline(!isOnline);
+    } catch (e) {
+      alert(e?.data?.message || 'Gagal mengubah status');
+    }
+  };
 
   const handleLogout = async () => {
     const result = await konfirmasiLogout();
@@ -81,7 +92,7 @@ const VolunteerTopBar = ({ isOnline, setIsOnline, onOpenSidebar }) => {
       {/* Quick Action Button */}
       <div className="flex items-center gap-3">
         <button
-          onClick={() => setIsOnline(!isOnline)}
+          onClick={handleToggleStatus}
           className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold transition-all cursor-pointer ${
             isOnline
               ? 'bg-blue-500/10 border-blue-500/40 text-blue-700'

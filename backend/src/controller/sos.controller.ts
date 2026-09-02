@@ -15,6 +15,7 @@ import {
   deleteSosServices,
   getBestVolunteerServices,
   getStatisticsSummaryServices,
+  getSosTrendServices,
 } from "../services/sos.services.js";
 import { AppError } from "../error/app.error.js";
 import type {
@@ -194,18 +195,20 @@ async function getStatisticsController(req: Request, res: Response) {
   // 1. Jalankan dua perhitungan secara paralel:
   //    - ranking  : daftar relawan + jumlah SOS resolved (30 hari)
   //    - summary  : ringkasan angka untuk kartu statistik (30 hari)
-  const [ranking, summary] = await Promise.all([
+  const [ranking, summary, trend] = await Promise.all([
     getBestVolunteerServices(30),
     getStatisticsSummaryServices(30),
+    getSosTrendServices(7),
   ]);
 
   // 2. Respons sukses berisi kedua data untuk halaman statistik admin
   return res.status(200).json({
     status: "success",
     message: "Berhasil mendapatkan statistik relawan",
-    data: { ranking, summary },
+    data: { ranking, summary, trend },
   });
 }
+
 
 // ===== EXPORT SEMUA CONTROLLER =====
 export {

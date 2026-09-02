@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Menu, Bell, ChevronDown, User, LogOut, Clock3, Radio, HeartHandshake } from 'lucide-react';
+import { Menu, ChevronDown, User, LogOut, Clock3, Radio, HeartHandshake } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../redux/authSlice';
@@ -81,19 +81,8 @@ const AdminTopBar = ({ onOpenSidebar, pendingCount = 0, inProgressCount = 0, vol
         </div>
       </div>
 
-      {/* Kanan: Notifikasi + Profil Admin + Logout */}
+      {/* Kanan: Profil Admin + Logout */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-        <button
-          className="relative p-2.5 bg-surface text-stone-600 rounded-xl shadow-neo-sm border border-stone-200 hover:bg-stone-100 active:scale-95 transition"
-          aria-label="Notifikasi"
-        >
-          <Bell className="w-4 h-4" />
-          <span className="absolute -top-0.5 -right-0.5 flex w-2.5 h-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-            <span className="relative inline-flex rounded-full w-2.5 h-2.5 bg-red-500 border-2 border-white" />
-          </span>
-        </button>
-
         <div className="w-px h-8 bg-stone-200 hidden sm:block" />
 
         {/* Dropdown Profil Admin */}
