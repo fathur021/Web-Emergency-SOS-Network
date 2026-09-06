@@ -46,11 +46,11 @@ router.patch("/:id/status", requireRole("volunteer", "admin"), updateSosStatusCo
 
 // ---- PATCH /api/sos/:id/data ----
 // Mengoreksi data sinyal (lokasi / deskripsi / foto)
-router.patch("/:id/data", updateSosDataController);
+router.patch("/:id/data", requireRole("admin"), updateSosDataController);
 
 // ---- DELETE /api/sos/:id ----
 // Menghapus sinyal — hanya admin
-router.delete("/:id", deleteSosController);
+router.delete("/:id", requireRole("admin"), deleteSosController);
 
 
 

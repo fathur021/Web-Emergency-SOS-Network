@@ -7,7 +7,9 @@ import api from "./api/index.api.js";
 import * as middlewares from "./middleware/index.middleware.js";
 
 
+
 config();
+const CLIENT_URLS = process.env.CLIENT_URL!.split(",").map((u) => u.trim());
 const app = express();
 app.use(morgan('dev'));
 app.use(
@@ -18,7 +20,18 @@ app.use(
     crossOriginResourcePolicy: { policy: "cross-origin" },
   })
 );
-app.use(cors());
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || CLIENT_URLS.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Origin tidak diizinkan"));
+      }
+    },
+    credentials: true,
+  }),
+);
 app.use(express.json());
 
 
