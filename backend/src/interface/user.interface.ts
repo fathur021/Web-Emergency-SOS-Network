@@ -3,6 +3,7 @@ export interface IUser {
     email: string;
     password: string;
     role : "user" | "volunteer" | "admin";
+    tokenVersion : number;
     latitude : number;
     longitude : number;
     locationName : string;

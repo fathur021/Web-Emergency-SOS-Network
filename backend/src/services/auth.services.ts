@@ -29,6 +29,7 @@ async function registerService(input: IRegisterInput): Promise<IAuthResponse> {
     sub: user._id.toString(),
     email: user.email,
     role: user.role,
+    tokenVersion: user.tokenVersion,
   });
 
   // 5. Kembalikan token + data user. PASSWORD TIDAK DIKIRIM!
@@ -63,6 +64,7 @@ async function loginService(input: ILoginInput): Promise<IAuthResponse> {
     sub: user._id.toString(),
     email: user.email,
     role: user.role,
+    tokenVersion: user.tokenVersion,
   });
 
   // 4. Kembalikan token + data user

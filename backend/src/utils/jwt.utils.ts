@@ -9,8 +9,8 @@ import { AppError } from '../error/app.error.js';
 // proses.env.JWT_SECRET masih kosong dan pasti error.
 function getJwtSecret(): string {
   const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    throw new Error('JWT_SECRET wajib diisi di file .env');
+  if (!secret || secret.length < 32) {
+    throw new Error('JWT_SECRET wajib diisi di file .env dan minimal 32 karakter');
   }
   return secret;
 }

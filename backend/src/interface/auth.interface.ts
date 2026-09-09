@@ -18,6 +18,7 @@ export interface IJwtPayload {
     sub : string; //subhect = id user ( dari -Id mongoDB)
     email: string;
     role : "user" | "volunteer" | "admin";
+    tokenVersion : number; //versi token, untuk invalidasi token lama ketika user logout
 }
 
 

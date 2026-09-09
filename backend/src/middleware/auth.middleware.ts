@@ -20,9 +20,15 @@ async function authenticate(req:Request, res:Response, next:NextFunction){
         throw new AppError(401, 'Pengguna tidak ditemukan');
     }
 
+    if (payload.tokenVersion !== user.tokenVersion) {
+        throw new AppError(401, 'Sesi telah berakhir, silakan login ulang');
+    }
+
     req.user = user;
     next();
 }
+
+
 function requireRole(...roles: ("user" | "volunteer" | "admin")[]) {
     return (req: Request, res: Response, next: NextFunction) => {
         if (!req.user || !roles.includes(req.user.role)) {

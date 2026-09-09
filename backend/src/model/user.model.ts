@@ -42,6 +42,11 @@ const userSchema = new mongoose.Schema<IUser>(
       default: "",
     },
 
+    tokenVersion: {
+      type: Number,
+      default: 0,
+    },
+
     radius: {
       type: Number,
       default: 5000,

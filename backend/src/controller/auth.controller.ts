@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { registerSchema, loginSchema, validateWith } from "../validation/auth.validation.js";
 import { registerService, loginService } from "../services/auth.services.js";
+import { User } from "../model/user.model.js";
 import type { IRegisterInput, ILoginInput } from "../interface/auth.interface.js";
 
 // PENTING: Express 5 otomatis meneruskan error yang di-throw dari fungsi async
@@ -36,5 +37,12 @@ async function loginController(req: Request, res: Response) {
   });
 }
 
+// ---- POST /api/auth/logout ----
+// Naikkan tokenVersion agar semua token lama jadi tidak valid.
+async function logoutController(req: Request, res: Response) {
+  await User.findByIdAndUpdate(req.user!._id, { $inc: { tokenVersion: 1 } });
+  res.status(200).json({ status: "success", message: "Logout berhasil" });
+}
+
 // ===== EXPORT SEMUA DI BAWAH =====
-export { registerController, loginController };
+export { registerController, loginController, logoutController };
