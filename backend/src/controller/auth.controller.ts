@@ -4,36 +4,59 @@ import { registerService, loginService } from "../services/auth.services.js";
 import { User } from "../model/user.model.js";
 import type { IRegisterInput, ILoginInput } from "../interface/auth.interface.js";
 
-// PENTING: Express 5 otomatis meneruskan error yang di-throw dari fungsi async
-// ke errorHandler. Jadi di sini tidak perlu try/catch sama sekali.
+
+function setTokenCookie(res: Response, token: string) {
+  const isProduction = process.env.NODE_ENV === "production";
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: isProduction, // Hanya kirim cookie via HTTPS di production
+    sameSite: "lax", // Cegah CSRF, tapi masih bisa dipakai di subdomain
+    path: "/", // Cookie berlaku untuk semua path
+    maxAge: 60 * 60 * 1000, // 1 jam (dalam milidetik)
+  })
+}
+
+function clearTokenCookie(res: Response) {
+  res.cookie("token", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0, // Hapus cookie dengan mengatur maxAge ke 0
+  })
+}
 
 // ---- POST /api/auth/register ----
 // Validasi otomatis pakai schema Joi, lalu panggil service.
+// ---- POST /api/auth/register ----
 async function registerController(req: Request, res: Response) {
-  // Kalau gagal validasi, validateWith melempar AppError 400.
-  // Kalau sukses, `input` sudah bersih (field ekstra sudah dibuang).
   const input = await validateWith<IRegisterInput>(registerSchema, req.body);
 
   const result = await registerService(input);
 
-  // Respons sukses 201 (Created)
+  // Set token ke cookie (bukan di response body)
+  setTokenCookie(res, result.token);
+
   res.status(201).json({
     status: "success",
     message: "Registrasi berhasil",
-    data: result,
+    data: { user: result.user },   // ← hanya user, tanpa token
   });
 }
+
+
+
 
 // ---- POST /api/auth/login ----
 async function loginController(req: Request, res: Response) {
   const input = await validateWith<ILoginInput>(loginSchema, req.body);
 
   const result = await loginService(input);
-
+   setTokenCookie(res, result.token);
   res.status(200).json({
     status: "success",
     message: "Login berhasil",
-    data: result,
+    data: { user: result.user },
   });
 }
 
@@ -41,6 +64,8 @@ async function loginController(req: Request, res: Response) {
 // Naikkan tokenVersion agar semua token lama jadi tidak valid.
 async function logoutController(req: Request, res: Response) {
   await User.findByIdAndUpdate(req.user!._id, { $inc: { tokenVersion: 1 } });
+  clearTokenCookie(res);
+
   res.status(200).json({ status: "success", message: "Logout berhasil" });
 }
 

@@ -3,6 +3,7 @@ import express from 'express';
 import morgan from 'morgan';
 import helmet from 'helmet';
 import cors from 'cors';
+import cokieParser from 'cookie-parser';
 import api from "./api/index.api.js";
 import * as middlewares from "./middleware/index.middleware.js";
 
@@ -12,6 +13,7 @@ config();
 const CLIENT_URLS = process.env.CLIENT_URL!.split(",").map((u) => u.trim());
 const app = express();
 app.use(morgan('dev'));
+app.use(cokieParser());
 app.use(
   helmet({
     // Izinkan frontend (origin lain) memuat resource seperti gambar upload.
