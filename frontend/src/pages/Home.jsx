@@ -10,7 +10,9 @@ const DEFAULT_COORDS = { latitude: -0.947, longitude: 100.354 };
 const Home = () => {
   const [coords, setCoords] = useState(DEFAULT_COORDS);
   const [activeSosMarkers, setActiveSosMarkers] = useState([]);
-  const hasToken = Boolean(localStorage.getItem('token'));
+  // Cek login via data user di localStorage (token tidak bisa dibaca JS —
+  // sudah ada di HttpOnly cookie, jadi gunakan `user` sebagai indikator)
+  const hasToken = Boolean(localStorage.getItem('user'));
   const { data: volunteersData } = useGetVolunteersQuery(undefined, {
     skip: !hasToken,
   });

@@ -17,8 +17,9 @@ const Navbar = () => {
   // State buka/tutup dropdown profil
   const [profilOpen, setProfilOpen] = useState(false);
 
-  // Lokasi asli dari profil user (skip kalau belum login)
-  const hasToken = Boolean(localStorage.getItem('token'));
+  // Cek login via data user di Redux (token ada di HttpOnly cookie,
+  // tidak bisa dibaca JS — jadi gunakan user sebagai indikator login)
+  const hasToken = Boolean(user);
   const { data: profileData } = useGetProfileQuery(undefined, {
     skip: !hasToken,
   });

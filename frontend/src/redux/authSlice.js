@@ -1,11 +1,3 @@
-
-// ================================================================
-// FILE: src/redux/authSlice.js
-// ================================================================
-// Slice untuk menyimpan status autentikasi (token & data user)
-// secara global di Redux store.
-// ================================================================
-
 import { createSlice } from '@reduxjs/toolkit';
 import { disconnectSocket } from '../services/socket';
 
@@ -13,7 +5,6 @@ import { disconnectSocket } from '../services/socket';
 // Kalau user sudah pernah login, saat refresh browser
 // token & user otomatis terbaca kembali.
 const initialState = {
-  token: localStorage.getItem('token') || null,
   user: JSON.parse(localStorage.getItem('user')) || null,
 };
 
@@ -24,23 +15,21 @@ const authSlice = createSlice({
 
   reducers: {
     // ===== setCredentials: dipanggil setelah login/register sukses =====
+    // action.payload = { user: { id, nama, email, role } }
+    // Token TIDAK ada lagi — token ada di HttpOnly cookie (di-set server).
     setCredentials: (state, action) => {
-      // action.payload = { token, user } dari backend
-      state.token = action.payload.token;
       state.user = action.payload.user;
 
-      // Simpan ke localStorage supaya tetap ada setelah refresh browser
-      localStorage.setItem('token', action.payload.token);
+      // Simpan hanya data user (bukan token) agar persist setelah refresh.
       localStorage.setItem('user', JSON.stringify(action.payload.user));
     },
 
     // ===== logout: dipanggil saat user menekan tombol Keluar =====
     logout: (state) => {
-      state.token = null;
       state.user = null;
 
-      // Hapus dari localStorage
-      localStorage.removeItem('token');
+      // Hapus data user dari localStorage. Cookie dihapus server
+      // lewat POST /api/auth/logout (clearTokenCookie).
       localStorage.removeItem('user');
       disconnectSocket();
     },

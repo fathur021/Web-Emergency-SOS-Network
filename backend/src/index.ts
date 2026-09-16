@@ -11,9 +11,14 @@ const port = process.env.PORT || 5000;
 await connectDB();
 
 const server = createServer(app);
+
+const CLIENT_URLS = process.env.CLIENT_URL!.split(",").map((u) => u.trim());
+
+
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: CLIENT_URLS,
+    credentials: true,
   },
 });
 
@@ -30,6 +35,10 @@ io.use(async (socket, next) => {
     const user = await User.findById(payload.sub);
     if (!user) {
       return next(new Error("Pengguna tidak ditemukan"));
+    }
+
+    if (payload.tokenVersion !== user.tokenVersion) {
+      return next(new Error("Sesi telah berakhir, silakan login ulang"));
     }
     // Simpan data user di socket, bisa dipakai di event lain nanti.
     socket.data.user = user;

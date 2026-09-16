@@ -19,15 +19,10 @@ const BASE_URL = API_BASE_URL;
 const baseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
 
-  // (Opsional) Kalau nanti ada endpoint yang butuh token JWT,
-  // uncomment blok ini agar Authorization header terkirim otomatis:
-  prepareHeaders: (headers) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      headers.set('Authorization', `Bearer ${token}`);
-    }
-    return headers;
-  },
+  // credentials: 'include' → browser ikut mengirim cookie HttpOnly
+  // pada setiap request. Token tidak lagi di localStorage,
+  // melainkan otomatis terkirim lewat cookie.
+  credentials: 'include',
 });
 
 // ---- 3. Definisikan API ----
@@ -67,6 +62,13 @@ export const authApi = createApi({
         body: userData,
       }),
     }),
+
+    // ===== Endpoint: GET /api/auth/token (khusus Socket.IO) =====
+    // Query (bukan mutation) karena hanya MEMBACA token baru dari server.
+    // Dipakai oleh services/socket.js untuk handshake Socket.IO.
+    getSocketToken: builder.query({
+      query: () => '/auth/token',
+    }),
   }),
 });
 
@@ -74,4 +76,4 @@ export const authApi = createApi({
 // Pola nama hook mutation: use<NamaEndpoint>Mutation
 // Setiap hook mengembalikan array [trigger, result]:
 //   const [login, { data, error, isLoading, isSuccess }] = useLoginMutation();
-export const { useLoginMutation, useRegisterMutation } = authApi;
+export const { useLoginMutation, useRegisterMutation, useGetSocketTokenQuery } = authApi;

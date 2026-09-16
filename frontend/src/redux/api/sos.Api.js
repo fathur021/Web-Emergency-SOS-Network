@@ -5,13 +5,9 @@ const BASE_URL = API_BASE_URL;
 
 const baseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
-  prepareHeaders: (headers) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      headers.set("Authorization", `Bearer ${token}`);
-    }
-    return headers;
-  },
+  // credentials: 'include' → browser ikut mengirim cookie HttpOnly
+  // otomatis pada setiap request. Token tidak lagi dari localStorage.
+  credentials: 'include',
 });
 
 export const sosApi = createApi({

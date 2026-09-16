@@ -4,12 +4,16 @@ import {AppError} from '../error/app.error.js';
 import {User} from '../model/user.model.js';
 
 async function authenticate(req:Request, res:Response, next:NextFunction){
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        throw new AppError(401, 'Token tidak ditemukan, silakan login dulu');
+
+    let token = req.cookies?.token;
+
+
+    if(!token){
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            token = authHeader.split(' ')[1];
+        }
     }
-    
-    const token = authHeader.split(' ')[1];
     if (!token) {
         throw new AppError(401, 'Token tidak valid');
     }
