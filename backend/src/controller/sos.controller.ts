@@ -18,6 +18,7 @@ import {
   getSosTrendServices,
 } from "../services/sos.services.js";
 import { AppError } from "../error/app.error.js";
+import { isImageFile, deleteUploadedFile } from "../utils/upload.utils.js";
 import type {
   ICreateSosInput,
   IUpdateSosStatusInput,
@@ -51,6 +52,12 @@ async function createSosController(
     const input = value as ICreateSosInput;
 
     if (req.file) {
+      // Verifikasi ISI file (magic bytes), bukan hanya label MIME dari client
+      const isImage = await isImageFile(req.file.path);
+      if (!isImage) {
+        deleteUploadedFile(req.file.path);
+        throw new AppError(400, "File harus berupa gambar asli (JPG/PNG/GIF/WEBP)");
+      }
       input.image = `/uploads/${req.file.filename}`;
     }
     // (4) userId diambil dari token JWT, bukan dari body

@@ -22,7 +22,7 @@ import {
 } from "../validation/auth.validation.js";
 import type { ICreateUserInput, IUpdateUserInput } from "../interface/user.interface.js";
 import { User } from "../model/user.model.js";
-import { deleteUploadedFile } from "../utils/upload.utils.js";
+import { deleteUploadedFile, isImageFile } from "../utils/upload.utils.js";
 
 async function getProfileController(req: Request, res: Response) {
   const userId = req.user!._id.toString(); // Use the authenticated user's ID
@@ -186,6 +186,16 @@ async function updatePhotoController(req:Request, res:Response){
       status:"fail",
       message:"File foto wajib di unggah"
     })
+  }
+
+  // Verifikasi ISI file (magic bytes), bukan hanya ekstensi/nama file
+  const isImage = await isImageFile(req.file.path);
+  if (!isImage) {
+    deleteUploadedFile(req.file.path);
+    return res.status(400).json({
+      status: "fail",
+      message: "File harus berupa gambar asli (JPG/PNG/GIF/WEBP)",
+    });
   }
 
   // Ambil foto lama dari user (sebelum diganti) untuk dihapus dari disk

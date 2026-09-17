@@ -114,7 +114,7 @@ async function deleteUserServices(userId: string) {
 async function createUserService(input: ICreateUserInput) {
   const existing = await User.findOne({ email: input.email });
   if (existing) {
-    throw new AppError(409, "Email sudah terdaftar"); // 409 = Conflict
+    throw new AppError(409, "Email atau data sudah terdaftar"); // 409 = Conflict
   }
   const hashedPassword = await bcrypt.hash(input.password, 10);
   const user = await User.create({
@@ -142,7 +142,7 @@ async function updateUserAdminService(userId: string, input: IUpdateUserInput) {
   if (input.email && input.email !== user.email) {
     const dup = await User.findOne({ email: input.email });
     if (dup) {
-      throw new AppError(409, "Email sudah terdaftar");
+      throw new AppError(409, "Email atau data sudah terdaftar");
     }
   }
 

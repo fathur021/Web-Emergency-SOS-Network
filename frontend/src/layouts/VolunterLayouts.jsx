@@ -10,7 +10,7 @@ import {
   useUpdateLocationMutation,
   useUpdateSosStatusMutation,
 } from '../redux/api/sos.Api';
-import { getSocket } from '../services/socket';
+import { onSocket, offSocket } from '../services/socket';
 
 // volunteerId bisa berupa objek hasil populate { _id, nama } atau string/ObjectId
 const getVolunteerId = (s) =>
@@ -117,8 +117,6 @@ const VolunterLayouts = () => {
 
   // 2. Real-time: SOS baru masuk & SOS yang di-claim/selesai relawan lain
   useEffect(() => {
-    const socket = getSocket();
-
     const handleNewSos = (sos) => {
       setSosList((prev) => [sos, ...prev]);
       setIncomingSos((current) => (current ? current : toSosData(sos)));
@@ -144,13 +142,13 @@ const VolunterLayouts = () => {
       setIncomingSos((cur) => (cur?.id === id ? null : cur));
     };
 
-    socket.on('sos:new', handleNewSos);
-    socket.on('sos:update', handleUpdateSos);
-    socket.on('sos:delete', handleDeleteSos);
+    onSocket('sos:new', handleNewSos);
+    onSocket('sos:update', handleUpdateSos);
+    onSocket('sos:delete', handleDeleteSos);
     return () => {
-      socket.off('sos:new', handleNewSos);
-      socket.off('sos:update', handleUpdateSos);
-      socket.off('sos:delete', handleDeleteSos);
+      offSocket('sos:new', handleNewSos);
+      offSocket('sos:update', handleUpdateSos);
+      offSocket('sos:delete', handleDeleteSos);
     };
   }, [user?.id]);
 

@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import type {ISos} from "../interface/sos.interface.js";
 import { formatWIB } from "../utils/date.utils.js";
+import { signImageUrl } from "../utils/signedUrl.utils.js";
 
 const sosSchema = new mongoose.Schema<ISos>({
     // pengirim sinyal
@@ -50,12 +51,20 @@ const sosSchema = new mongoose.Schema<ISos>({
 
 // Otomatis ubah createdAt/updatedAt ke WIB setiap dokumen dijadikan JSON.
 // Berlaku untuk SEMUA controller yang mengirim data SOS.
+// Otomatis ubah waktu ke WIB + stempel path gambar.
+// Dijalankan setiap dokumen SOS diubah menjadi JSON (kiriman ke frontend).
+// Semua controller otomatis kena — tidak perlu edit satu-satu.
 sosSchema.set("toJSON", {
-    transform: (_doc, ret: any) => {
-        ret.createdAt = formatWIB(ret.createdAt);
-        ret.updatedAt = formatWIB(ret.updatedAt);
-        return ret;
-    },
+  transform: (_doc, ret: any) => {
+    ret.createdAt = formatWIB(ret.createdAt);
+    ret.updatedAt = formatWIB(ret.updatedAt);
+    // Stempel gambar: di DB tetap "/uploads/..", saat dikirim barulah
+    // ditambahi "?e=..&sig=.." supaya bisa melewati route bertanda tangan.
+    if (ret.image) {
+      ret.image = signImageUrl(ret.image);
+    }
+    return ret;
+  },
 });
 
 const Sos = mongoose.model<ISos>("Sos", sosSchema);

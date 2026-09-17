@@ -7,3 +7,14 @@ export const authLimiter = rateLimit({
     legacyHeaders: false, // Nonaktifkan header `X-RateLimit-*`
     message: {status: "error", message: "Terlalu banyak permintaan, silakan coba lagi nanti."},
 })
+
+export const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    standardHeaders:true,
+    legacyHeaders:false,
+    message: {
+        status: "error",
+        message: "Terlalu banyak permintaan, silahkan coba lagi nanti."
+    }
+})

@@ -3,7 +3,7 @@ import { Outlet } from "react-router-dom";
 import AdminSidebar from "../components/AdminSidebar";
 import AdminTopBar from "../components/AdminTopBar";
 import { useGetAllSosQuery, useGetVolunteersQuery } from "../redux/api/sos.Api";
-import { getSocket } from "../services/socket";
+import { onSocket, offSocket } from "../services/socket";
 
 const statusMap = {
   pending: "Pending",
@@ -58,7 +58,6 @@ const AdminLayout = () => {
 
 // 2. Real-time: SOS baru yang dikirim user langsung muncul via socket
   useEffect(() => {
-    const socket = getSocket();
     const handleNewSos = (sos) => {
       setIncidents((prev) => [
         {
@@ -75,12 +74,11 @@ const AdminLayout = () => {
       ]);
     };
     
-    socket.on('sos:new', handleNewSos);
-    return () => socket.off('sos:new', handleNewSos);
+    onSocket('sos:new', handleNewSos);
+    return () => offSocket('sos:new', handleNewSos);
   }, []);
 
   useEffect(() => {
-  const socket = getSocket();
   const handleUpdateSos = (sos) => {
     setIncidents((prev) =>
       prev.map((item) =>
@@ -90,18 +88,17 @@ const AdminLayout = () => {
       ),
     );
   };
-  socket.on('sos:update', handleUpdateSos);
-  return () => socket.off('sos:update', handleUpdateSos);
+  onSocket('sos:update', handleUpdateSos);
+  return () => offSocket('sos:update', handleUpdateSos);
 }, []);
 
 // 2b. Real-time: SOS dihapus → langsung hilang dari peta & daftar
 useEffect(() => {
-  const socket = getSocket();
   const handleDeleteSos = ({ id }) => {
     setIncidents((prev) => prev.filter((item) => item.id !== id));
   };
-  socket.on('sos:delete', handleDeleteSos);
-  return () => socket.off('sos:delete', handleDeleteSos);
+  onSocket('sos:delete', handleDeleteSos);
+  return () => offSocket('sos:delete', handleDeleteSos);
 }, []);
 
   const pendingCount = incidents.filter((i) => i.status === 'Pending').length;

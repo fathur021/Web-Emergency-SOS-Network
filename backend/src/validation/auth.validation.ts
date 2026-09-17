@@ -13,9 +13,11 @@ export const registerSchema = Joi.object({
     "any.required": "Email harus diisi",
   }),
 
-  password: Joi.string().min(6).required().messages({
+  password: Joi.string().min(8).max(64).pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/).required().messages({
     "string.empty": "Password harus diisi",
-    "string.min": "Password minimal 6 karakter",
+    "string.min": "Password minimal 8 karakter",
+    "string.max": "Password maksimal 64 karakter",
+    "string.pattern.base": "Password harus mengandung huruf kecil, huruf besar, dan angka",
     "any.required": "Password harus diisi",
   }),
 });
@@ -66,9 +68,11 @@ export const createUserSchema = Joi.object({
     "any.required": "Email harus diisi",
   }),
 
-  password: Joi.string().min(6).required().messages({
+  password: Joi.string().min(8).max(64).pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/).required().messages({
     "string.empty": "Password harus diisi",
-    "string.min": "Password minimal 6 karakter",
+    "string.min": "Password minimal 8 karakter",
+    "string.max": "Password maksimal 64 karakter",
+    "string.pattern.base": "Password harus mengandung huruf kecil, huruf besar, dan angka",
     "any.required": "Password harus diisi",
   }),
 
@@ -93,8 +97,10 @@ export const updateUserSchema = Joi.object({
     "any.only": "Role harus user, volunteer, atau admin",
   }),
 
-  password: Joi.string().min(6).allow("").messages({
-    "string.min": "Password minimal 6 karakter",
+  password: Joi.string().min(8).max(64).allow("").pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/).messages({
+    "string.min": "Password minimal 8 karakter",
+    "string.max": "Password maksimal 64 karakter",
+    "string.pattern.base": "Password harus mengandung huruf kecil, huruf besar, dan angka",
   }),
 })
   .min(1)
@@ -116,9 +122,11 @@ export const changePasswordSchema = Joi.object({
     "any.required": "Kata sandi lama harus diisi",
   }),
 
-  newPassword: Joi.string().min(6).required().messages({
+  newPassword: Joi.string().min(8).max(64).pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/).required().messages({
     "string.empty": "Kata sandi baru harus diisi",
-    "string.min": "Kata sandi baru minimal 6 karakter",
+    "string.min": "Kata sandi baru minimal 8 karakter",
+    "string.max": "Kata sandi baru maksimal 64 karakter",
+    "string.pattern.base": "Kata sandi baru harus mengandung huruf kecil, huruf besar, dan angka",
     "any.required": "Kata sandi baru harus diisi",
   }),
 });

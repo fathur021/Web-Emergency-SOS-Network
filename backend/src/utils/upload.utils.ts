@@ -2,6 +2,25 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { AppError } from "../error/app.error.js";
+import {fileTypeFromFile} from "file-type";
+
+
+const ALLOWED_IMAGE_MIME = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif"
+]
+
+export async function isImageFile(filePath: string): Promise<boolean>{
+  try {
+    const fileType = await fileTypeFromFile(filePath);
+    return fileType != null && ALLOWED_IMAGE_MIME.includes(fileType.mime);
+    
+  } catch (error) {
+    return false;
+  }
+}
 
 // ==================================================================
 // UPLOAD UNTUK SOS (gambar laporan darurat)
@@ -10,7 +29,7 @@ import { AppError } from "../error/app.error.js";
 const storage = multer.diskStorage({
   // simpan di folder uploads/ (di root backend)
   destination: (_req, _file, cb) => {
-    cb(null, "uploads/");
+    cb(null, "private_uploads/");
   },
   // beri nama unik agar tidak tertimpa: sos-<timestamp>-<angka-acak>.<ekstensi>
   filename: (_req, file, cb) => {
@@ -19,6 +38,8 @@ const storage = multer.diskStorage({
     cb(null, `sos-${unique}${ext}`);
   },
 });
+
+
 
 // Hanya izinkan file bertipe gambar
 function fileFilter(_req: any, file: Express.Multer.File, cb: any) {
@@ -41,7 +62,7 @@ const upload = multer({
 // folder & penamaan khusus agar mudah dibedakan dari file SOS
 const profileStorage = multer.diskStorage({
   destination: (_req, _file, cb) => {
-    cb(null, "uploads/");
+    cb(null, "private_uploads/");
   },
   filename: (_req, file, cb) => {
     const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
@@ -81,7 +102,7 @@ export function deleteUploadedFile(urlPath?: string) {
   // Ambil nama file dari path "/uploads/<nama>"
   const fileName = path.basename(urlPath);
   // Gabungkan dengan folder uploads relatif ke direktori backend
-  const filePath = path.join("uploads", fileName);
+  const filePath = path.join("private_uploads", fileName);
 
   // Hapus file kalau memang ada (abaikan error: file mungkin sudah tidak ada)
   try {

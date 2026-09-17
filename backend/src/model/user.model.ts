@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import type { IUser } from "../interface/user.interface.js";
-
+import { signImageUrl } from "../utils/signedUrl.utils.js";
 const userSchema = new mongoose.Schema<IUser>(
   {
     nama: {
@@ -67,5 +67,13 @@ const userSchema = new mongoose.Schema<IUser>(
 );
 
 const User = mongoose.model<IUser>("User", userSchema);
+userSchema.set("toJSON", {
+  transform: (_doc, ret: any) => {
+    if (ret.photo) {
+      ret.photo = signImageUrl(ret.photo);
+    }
+    return ret;
+  },
+});
 
 export { User };
