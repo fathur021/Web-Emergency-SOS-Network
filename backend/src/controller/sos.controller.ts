@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import { Types } from "mongoose";
 import {
   createSosSchema,
   updateSosStatusSchema,
@@ -56,7 +57,10 @@ async function createSosController(
       const isImage = await isImageFile(req.file.path);
       if (!isImage) {
         deleteUploadedFile(req.file.path);
-        throw new AppError(400, "File harus berupa gambar asli (JPG/PNG/GIF/WEBP)");
+        throw new AppError(
+          400,
+          "File harus berupa gambar asli (JPG/PNG/GIF/WEBP)",
+        );
       }
       input.image = `/uploads/${req.file.filename}`;
     }
@@ -101,6 +105,20 @@ async function getSosByIdController(
 ) {
   const { id } = req.params;
   const sos = await getSosByIdServices(id);
+
+  // ownerId: di interface sos.userId bertipe Types.ObjectId, TAPI service
+  // memanggil .populate("userId", ...) sehingga DI RUNTIME isinya dokumen
+  // User yang punya properti _id. Karena TS belum tahu, kita cast dulu.
+  const ownerId = (sos.userId as unknown as { _id: Types.ObjectId })._id.toString();
+
+  const userRole = req.user!.role;
+  const isMonitor = userRole === "admin" || userRole === "volunteer";
+  const isOwner = ownerId === req.user!._id.toString();
+
+  if (!isMonitor && !isOwner) {
+    // 403 (bukan 404) supaya attacker tidak tahu SOS itu ada/tidak.
+    throw new AppError(403, "Anda tidak berhak melihat SOS ini");
+  }
 
   res.status(200).json({
     status: "success",
@@ -215,7 +233,6 @@ async function getStatisticsController(req: Request, res: Response) {
     data: { ranking, summary, trend },
   });
 }
-
 
 // ===== EXPORT SEMUA CONTROLLER =====
 export {

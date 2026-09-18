@@ -87,7 +87,6 @@ const ProfileForm = ({ user }) => {
     const merged = { ...userFromRedux, ...freshUser };
     dispatch(
       setCredentials({
-        token: localStorage.getItem("token"),
         user: merged,
       }),
     );

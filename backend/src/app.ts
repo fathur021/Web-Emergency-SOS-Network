@@ -20,6 +20,16 @@ app.use(
     // Default helmet mengirim `Cross-Origin-Resource-Policy: same-origin`
     // yang memblokir <img> dari origin backend ke frontend (NotSameOrigin).
     crossOriginResourcePolicy: { policy: "cross-origin" },
+    contentSecurityPolicy: {
+      directives: {
+        "default-src": ["'self'"],
+        "img-src": ["'self'", "data:", "blob:"],
+        "object-src": ["'none'"],
+        "frame-ancestors": ["'none'"], // halaman ini tidak boleh dibungkus <iframe>
+        "upgrade-insecure-requests": null,
+      }
+    }
+      
   }),
 );
 app.use(

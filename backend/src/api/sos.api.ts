@@ -10,6 +10,7 @@ import {
   getStatisticsController,
 } from "../controller/sos.controller.js";
 import { authenticate, requireRole } from "../middleware/auth.middleware.js";
+import { sosLimiter } from "../middleware/rateLimit.middleware.js";
 import { upload } from "../utils/upload.utils.js";
 
 
@@ -19,8 +20,9 @@ const router = express.Router();
 router.use(authenticate);
 
 // ---- POST /api/sos ----
-// User mengirim sinyal SOS baru
-router.post("/", upload.single("image"), createSosController);
+// User mengirim sinyal SOS baru.
+// `sosLimiter` (5x/15 mnt/IP) — anti-spam tombol SOS; ketat karena SOS = aksi darurat.
+router.post("/", sosLimiter, upload.single("image"), createSosController);
 
 // PENTING: route "/user" HARUS ditaruh SEBELUM "/:id".
 // Kalau tidak, "user" akan dianggap sebagai id oleh Express.
@@ -49,8 +51,11 @@ router.patch("/:id/status", requireRole("volunteer", "admin"), updateSosStatusCo
 router.patch("/:id/data", requireRole("admin"), updateSosDataController);
 
 // ---- DELETE /api/sos/:id ----
-// Menghapus sinyal — hanya admin
-router.delete("/:id", requireRole("admin"), deleteSosController);
+// Membatalkan/menghapus sinyal SOS.
+// Bisa dipakai user pemilik (SOS pending) ATAU admin.
+// Keamanan (owner-check + status pending) dipegang oleh deleteSosServices,
+// bukan di route ini → user biasa bisa batal, admin bisa hapus apa saja.
+router.delete("/:id", deleteSosController);
 
 
 

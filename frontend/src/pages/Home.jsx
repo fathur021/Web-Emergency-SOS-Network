@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SosCard from '../components/SosCard';
@@ -10,9 +11,9 @@ const DEFAULT_COORDS = { latitude: -0.947, longitude: 100.354 };
 const Home = () => {
   const [coords, setCoords] = useState(DEFAULT_COORDS);
   const [activeSosMarkers, setActiveSosMarkers] = useState([]);
-  // Cek login via data user di localStorage (token tidak bisa dibaca JS —
-  // sudah ada di HttpOnly cookie, jadi gunakan `user` sebagai indikator)
-  const hasToken = Boolean(localStorage.getItem('user'));
+  // Login check via Redux (sama seperti SosCard) — satu sumber kebenaran auth.
+  const user = useSelector((state) => state.auth.user);
+  const hasToken = Boolean(user);
   const { data: volunteersData } = useGetVolunteersQuery(undefined, {
     skip: !hasToken,
   });

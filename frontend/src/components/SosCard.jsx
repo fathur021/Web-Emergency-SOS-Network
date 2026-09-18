@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import {
   AlertTriangle,
   Camera,
@@ -10,10 +11,11 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
-  useCreateSosMutation,
   useGetSosByUserQuery,
+  useCreateSosMutation,
   useDeleteSosMutation,
 } from "../redux/api/sos.Api";
+import { useSearchParams } from "react-router-dom";
 import { konfirmasiBatalSos, popupSukses, popupGagal } from "../utils/alert";
 import { getImageUrl } from "../config/api";
 
@@ -28,7 +30,10 @@ const SosCard = ({ onCoordsChange, onSosCreated, onSosDeleted }) => {
   const [isCancelling, setIsCancelling] = useState(false);
   const [error, setError] = useState("");
 
-  const hasToken = Boolean(localStorage.getItem("token"));
+  // KEAMANAN: cek status login lewat Redux (user dari cookie HttpOnly).
+  // Token TIDAK lagi di localStorage → localStorage.getItem("token") SELALU null.
+  // Dipakai untuk: (1) deteksi SOS aktif user & (2) blokir tombol kalau belum login.
+  const hasToken = Boolean(useSelector((state) => state.auth.user));
   const [createSos] = useCreateSosMutation();
   const [deleteSos] = useDeleteSosMutation();
 

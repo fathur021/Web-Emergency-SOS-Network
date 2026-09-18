@@ -115,6 +115,44 @@ export const updateProfileSchema = Joi.object({
     "any.required": "Nama wajib di isi",
   }),
 });
+
+export const updateLocationSchema = Joi.object({
+  latitude: Joi.number()
+    .min(-90)
+    .max(90)
+    .required()
+    .messages({
+      "number.base": "Latitude harus berupa angka",
+      "number.min": "Latitude minimal -90",
+      "number.max": "Latitude maksimal 90",
+      "any.required": "Latitude wajib diisi",
+    }),
+   longitude: Joi.number()
+    .min(-180)
+    .max(180)
+    .required()
+    .messages({
+      "number.base": "Longitude harus berupa angka",
+      "number.min": "Longitude minimal -180",
+      "number.max": "Longitude maksimal 180",
+      "any.required": "Longitude wajib diisi",
+    }),
+
+     locationName: Joi.string().allow("").default("").messages({
+    "string.base": "Nama lokasi harus berupa teks",
+  }),
+
+   radius: Joi.number()
+    .min(100)
+    .max(10000)
+    .default(5000)
+    .messages({
+      "number.base": "Radius harus berupa angka (meter)",
+      "number.min": "Radius minimal 100 meter",
+      "number.max": "Radius maksimal 10000 meter",
+    }),
+})
+
 // Schema untuk ganti password
 export const changePasswordSchema = Joi.object({
   oldPassword: Joi.string().required().messages({

@@ -19,6 +19,7 @@ import {
   updateProfileSchema,
   changePasswordSchema,
   validateWith,
+  updateLocationSchema,
 } from "../validation/auth.validation.js";
 import type { ICreateUserInput, IUpdateUserInput } from "../interface/user.interface.js";
 import { User } from "../model/user.model.js";
@@ -46,21 +47,18 @@ async function getAllUsersController(req: Request, res: Response) {
 
 async function updateLocationController(req: Request, res: Response) {
   const userId = req.user!._id.toString();
-  const { latitude, longitude, locationName, radius } = req.body;
 
-  if (latitude == null || longitude == null) {
-    return res.status(400).json({
-      status: "fail",
-      message: "Latitude dan longitude wajib diisi",
-    });
-  }
+  // Sekarang pakai Joi: kalau data kurang/aneh, validateWith melempar
+  // AppError 400 sendiri — tidak perlu lagi if (latitude == null) manual.
+  // Joi juga sudah mengisi default locationName:"" dan radius:5000.
+  const input = await validateWith<{
+    latitude: number;
+    longitude: number;
+    locationName: string;
+    radius: number;
+  }>(updateLocationSchema, req.body);
 
-  const profile = await updateLocationService(userId, {
-    latitude,
-    longitude,
-    locationName: locationName || "",
-    radius: radius || 5000,
-  });
+  const profile = await updateLocationService(userId, input);
 
   return res.status(200).json({
     status: "success",
