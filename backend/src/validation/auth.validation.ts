@@ -144,12 +144,12 @@ export const updateLocationSchema = Joi.object({
 
    radius: Joi.number()
     .min(100)
-    .max(10000)
+    .max(50000)
     .default(5000)
     .messages({
       "number.base": "Radius harus berupa angka (meter)",
       "number.min": "Radius minimal 100 meter",
-      "number.max": "Radius maksimal 10000 meter",
+      "number.max": "Radius maksimal 50000 meter",
     }),
 })
 

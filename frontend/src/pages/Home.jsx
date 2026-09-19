@@ -6,10 +6,8 @@ import SosCard from '../components/SosCard';
 import MapView from '../components/MapContainer';
 import { useGetSosByUserQuery, useGetVolunteersQuery } from '../redux/api/sos.Api';
 
-const DEFAULT_COORDS = { latitude: -0.947, longitude: 100.354 };
-
 const Home = () => {
-  const [coords, setCoords] = useState(DEFAULT_COORDS);
+  const [coords, setCoords] = useState(null);
   const [activeSosMarkers, setActiveSosMarkers] = useState([]);
   // Login check via Redux (sama seperti SosCard) — satu sumber kebenaran auth.
   const user = useSelector((state) => state.auth.user);
@@ -96,8 +94,8 @@ const Home = () => {
       {/* 2. PETA (React Leaflet MapView) — memenuhi layar, navbar melayang di atasnya */}
       <div className="absolute inset-0" style={{ zIndex: 0 }}>
         <MapView
-          latitude={coords.latitude}
-          longitude={coords.longitude}
+          latitude={coords?.latitude}
+          longitude={coords?.longitude}
           markers={visibleSosMarkers}
           volunteers={volunteerMarkers}
         />

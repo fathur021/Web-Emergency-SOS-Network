@@ -20,8 +20,6 @@ import { konfirmasiBatalSos, popupSukses, popupGagal } from "../utils/alert";
 import { getImageUrl } from "../config/api";
 
 
-const DEFAULT_COORDS = { latitude: -0.947, longitude: 100.354 };
-
 const SosCard = ({ onCoordsChange, onSosCreated, onSosDeleted }) => {
   const [description, setDescription] = useState("");
   const navigate = useNavigate();
@@ -49,9 +47,9 @@ const SosCard = ({ onCoordsChange, onSosCreated, onSosDeleted }) => {
     activeSos?.status === "pending" ? activeSos._id : null;
 
   const getCurrentPosition = () => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
-        resolve(DEFAULT_COORDS);
+        reject(new Error("Browser tidak mendukung GPS"));
         return;
       }
       navigator.geolocation.getCurrentPosition(
@@ -60,7 +58,7 @@ const SosCard = ({ onCoordsChange, onSosCreated, onSosDeleted }) => {
             latitude: pos.coords.latitude,
             longitude: pos.coords.longitude,
           }),
-        () => resolve(DEFAULT_COORDS),
+        () => reject(new Error("Gagal mendapatkan lokasi. Izinkan akses lokasi untuk mengirim SOS")),
         { enableHighAccuracy: true, timeout: 10000 },
       );
     });
@@ -90,7 +88,7 @@ const SosCard = ({ onCoordsChange, onSosCreated, onSosDeleted }) => {
       setDescription("");
       setImageFile(null);
     } catch (error) {
-      setError(error?.data?.message || "Gagal mengirim SOS, coba lagi.");
+      setError(error?.data?.message || error?.message || "Gagal mengirim SOS, coba lagi.");
     } finally {
       setIsLoading(false);
     }

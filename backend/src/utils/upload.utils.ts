@@ -5,6 +5,8 @@ import { AppError } from "../error/app.error.js";
 import {fileTypeFromFile} from "file-type";
 
 
+fs.mkdirSync("private_uploads", { recursive: true });
+
 const ALLOWED_IMAGE_MIME = [
   "image/jpeg",
   "image/png",

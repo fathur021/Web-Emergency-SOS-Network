@@ -17,8 +17,13 @@ import { getImageUrl } from '../config/api';
 
 
 // volunteerId bisa berupa objek hasil populate { _id, nama } atau string/ObjectId
-const getVolunteerId = (s) =>
-  s?.volunteerId ? String(s.volunteerId._id ?? s.volunteerId) : null;
+const getVolunteerId = (s) => {
+  if (!s?.volunteerId) return null;
+  if (typeof s.volunteerId === 'object') {
+    return String(s.volunteerId._id || s.volunteerId.id || '');
+  }
+  return String(s.volunteerId);
+};
 
 const STATUS_META = {
   pending: {
@@ -48,12 +53,16 @@ const RiwayatBantuan = () => {
   const [search, setSearch] = useState('');
 
   const user = useSelector((state) => state.auth.user);
+  const currentUserId = String(user?.id || user?._id || '');
   const { data } = useGetAllSosQuery();
   const [updateSosStatus] = useUpdateSosStatusMutation();
 
   // Hanya SOS yang ditangani relawan yang login
   const history = (data?.data || []).filter(
-    (s) => s.volunteerId && getVolunteerId(s) === user?.id,
+    (s) =>
+      s.volunteerId &&
+      currentUserId &&
+      String(getVolunteerId(s)) === currentUserId,
   );
 
   const handleResolve = async (id) => {

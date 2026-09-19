@@ -24,14 +24,35 @@ const PengaturanRadius = () => {
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
+  // Preferensi "Ikuti Posisi GPS Otomatis" (disimpan per perangkat).
+  // true  = posisi DB otomatis diperbarui dari GPS browser.
+  // false = lokasi manual yang diatur di halaman ini yang dipakai.
+  const [gpsActive, setGpsActive] = useState(
+    () => localStorage.getItem("gpsActive") !== "false",
+  );
+
+  const handleToggleGps = () => {
+    setGpsActive((prev) => {
+      const next = !prev;
+      localStorage.setItem("gpsActive", String(next));
+      return next;
+    });
+  };
+
+  // Ubah string koordinat (bisa berisi koma desimal) menjadi angka murni.
+  const toNumber = (v) => {
+    const t = String(v ?? "").trim().replace(/,/g, ".");
+    return t === "" ? NaN : Number(t);
+  };
+
   // Isi form dari data profil saat pertama load
   useEffect(() => {
     if (profileData?.data) {
       const p = profileData.data;
-      if (p.latitude) setLatitude(String(p.latitude));
-      if (p.longitude) setLongitude(String(p.longitude));
+      if (p.latitude != null) setLatitude(String(p.latitude));
+      if (p.longitude != null) setLongitude(String(p.longitude));
       if (p.locationName) setLocationName(p.locationName);
-      if (p.radius) setRadius(p.radius);
+      if (p.radius != null) setRadius(p.radius);
     }
   }, [profileData]);
 
@@ -64,8 +85,8 @@ const PengaturanRadius = () => {
     setErrorMsg("");
     setSuccessMsg("");
 
-    const lat = parseFloat(latitude);
-    const lng = parseFloat(longitude);
+    const lat = toNumber(latitude);
+    const lng = toNumber(longitude);
 
     if (isNaN(lat) || isNaN(lng)) {
       setErrorMsg("Latitude dan longitude harus berupa angka yang valid");
@@ -148,6 +169,33 @@ const PengaturanRadius = () => {
             </button>
           </div>
 
+          {/* Toggle: posisi otomatis dari GPS vs lokasi manual */}
+          <div className="flex items-center justify-between bg-stone-100 border border-stone-200 rounded-xl px-4 py-3">
+            <div className="pr-3">
+              <p className="text-xs font-semibold text-stone-800">
+                Ikuti Posisi GPS Otomatis
+              </p>
+              <p className="text-[10px] text-stone-500 leading-snug">
+                {gpsActive
+                  ? "Posisi akan diperbarui otomatis dari GPS browser."
+                  : "Posisi manual yang kamu atur akan disimpan."}
+              </p>
+            </div>
+            <button
+              onClick={handleToggleGps}
+              aria-pressed={gpsActive}
+              className={`relative w-12 h-6 rounded-full shrink-0 transition cursor-pointer ${
+                gpsActive ? "bg-blue-600" : "bg-stone-300"
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                  gpsActive ? "translate-x-6" : ""
+                }`}
+              />
+            </button>
+          </div>
+
           {/* Input Nama Lokasi */}
           <div className="space-y-1.5">
             <label className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">
@@ -169,11 +217,11 @@ const PengaturanRadius = () => {
                 Latitude
               </label>
               <input
-                type="number"
-                step="any"
+                type="text"
+                inputMode="decimal"
                 value={latitude}
                 onChange={(e) => setLatitude(e.target.value)}
-                placeholder="-6.2088"
+                placeholder="-0.1788"
                 className="w-full bg-stone-100 border border-stone-200 rounded-xl px-3.5 py-2.5 text-xs text-stone-800 placeholder-stone-400 focus:outline-none focus:border-blue-500 transition font-mono"
               />
             </div>
@@ -182,11 +230,11 @@ const PengaturanRadius = () => {
                 Longitude
               </label>
               <input
-                type="number"
-                step="any"
+                type="text"
+                inputMode="decimal"
                 value={longitude}
                 onChange={(e) => setLongitude(e.target.value)}
-                placeholder="106.8456"
+                placeholder="100.3450"
                 className="w-full bg-stone-100 border border-stone-200 rounded-xl px-3.5 py-2.5 text-xs text-stone-800 placeholder-stone-400 focus:outline-none focus:border-blue-500 transition font-mono"
               />
             </div>

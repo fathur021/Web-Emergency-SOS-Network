@@ -13,8 +13,13 @@ import {
 import { getImageUrl } from '../config/api';
 
 // volunteerId bisa berupa objek hasil populate { _id, nama } atau string/ObjectId
-const getVolunteerId = (s) =>
-  s?.volunteerId ? String(s.volunteerId._id ?? s.volunteerId) : null;
+const getVolunteerId = (s) => {
+  if (!s?.volunteerId) return null;
+  if (typeof s.volunteerId === 'object') {
+    return String(s.volunteerId._id || s.volunteerId.id || '');
+  }
+  return String(s.volunteerId);
+};
 
 const VolunteerTopBar = ({ isOnline, setIsOnline, onOpenSidebar }) => {
   const navigate = useNavigate();
@@ -25,6 +30,7 @@ const VolunteerTopBar = ({ isOnline, setIsOnline, onOpenSidebar }) => {
   const [profilOpen, setProfilOpen] = useState(false);
 
   const user = useSelector((state) => state.auth.user);
+  const currentUserId = String(user?.id || user?._id || '');
   const { data: profileData } = useGetProfileQuery();
   const photo = profileData?.data?.photo;
   const { data } = useGetAllSosQuery();
@@ -37,7 +43,8 @@ const VolunteerTopBar = ({ isOnline, setIsOnline, onOpenSidebar }) => {
   const myHandling = allSos.filter(
     (s) =>
       s.status === 'in_progress' &&
-      getVolunteerId(s) === user?.id,
+      currentUserId &&
+      String(getVolunteerId(s)) === currentUserId,
   );
 
   const totalNotif = myHandling.length;
