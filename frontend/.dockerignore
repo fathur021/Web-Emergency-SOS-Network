@@ -1,0 +1,10 @@
+# ============================================================
+# .dockerignore — Frontend
+# ============================================================
+# Sama tujuannya dengan backend/.dockerignore:
+# hal-hal ini TIDAK disalin ke image saat `docker compose up`.
+# .env tetap terbaca saat runtime karena folder frontend
+# ikut di-bind-mount ke container bersama source code-nya.
+node_modules
+dist
+.env

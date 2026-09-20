@@ -1,0 +1,16 @@
+# ============================================================
+# .dockerignore — Backend
+# ============================================================
+# File ini mendaftarkan file/folder yang TIDAK ikut disalin
+# saat Docker build (COPY . .). Gunanya:
+#   1) Image jadi kecil & cepat dibangun
+#   2) Tidak membekukan rahasia (.env) ke dalam image
+#   3) Tidak menyalin node_modules Windows ke image
+#
+# Catatan penting: .env TETAP terbaca oleh aplikasi saat runtime
+# karena folder backend ikut di-bind-mount ke container.
+# Jadi mengecualikan .env di sini hanya untuk menjaga image tetap "bersih".
+node_modules
+dist
+private_uploads
+.env

@@ -1,0 +1,154 @@
+# ============================================================
+# docker-compose.yml — Emergency SOS Network (MODE DEVELOPMENT)
+# ============================================================
+# File ini adalah "remote kontrol" untuk menjalankan 3 layanan
+# sekaligus hanya dengan SATU perintah:  docker compose up
+#
+#   1) mongo     -> database MongoDB (tidak perlu install manual lagi)
+#   2) backend   -> Express API + Socket.IO (tsx watch, hot-reload)
+#   3) frontend  -> Vite dev server (HMR)
+#
+# Cara pakai:
+#   docker compose up        -> jalankan (lihat log di terminal)
+#   docker compose up -d     -> jalankan di background
+#   docker compose down      -> matikan (data tetap tersimpan)
+#   docker compose down -v   -> matikan + hapus SEMUA data (reset)
+#   docker compose logs backend   -> lihat log backend
+# ============================================================
+
+# Nama proyek container, supaya gampang dikenali di `docker ps`
+name: emergency-sos
+
+services:
+  # ==========================================================
+  # LAYANAN 1: MongoDB
+  # ==========================================================
+  mongo:
+    # Pakai image resmi MongoDB versi 7.
+    # Tidak perlu Dockerfile, cukup sebut nama image-nya.
+    image: mongo:7
+
+    # Nama container biar gampang ditebak saat lihat `docker ps`
+    container_name: sos-mongo
+
+    # Kalau container mati/meng-crash otomatis dinyalakan lagi,
+    # kecuali kita matikan manual dengan `docker compose down`
+    restart: unless-stopped
+
+    # Memetakan port HOST:CONTAINER (kiri = host, kanan = container).
+    # Maksudnya: alamat 127.0.0.1:27017 di Windows kamu
+    # diteruskan ke port 27017 di dalam container mongo.
+    # Berguna kalau kamu mau buka MongoDB Compass dari Windows.
+    # (Kalau tidak butuh, baris ini cukup dihapus/hapus komentarnya saja.)
+    ports:
+      - "27017:27017"
+
+    # Volume = "gudang" data Docker yang tahan restart.
+    # Data MongoDB di dalam container disimpan di /data/db,
+    # dan kita tempelkan ke volume bernama "mongo-data".
+    # Jadi walaupun container dihapus, data tidak ikut hilang.
+    volumes:
+      - mongo-data:/data/db
+
+    # "Sehatkah DB?" -> dicek tiap 10 detik pakai perintah mongosh ping.
+    # Maksudnya: backend baru boleh start SETELAH mongo menyatakan sehat,
+    # supaya tidak kena error "MongoDB connection error" di awal boot.
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s   # cek setiap 10 detik
+      timeout: 5s     # kalau >5 detik tidak ada jawaban, dianggap gagal
+      retries: 5      # 5x gagal berturut-turut baru dinyatakan UNHEALTHY
+
+  # ==========================================================
+  # LAYANAN 2: Backend (Express API + Socket.IO)
+  # ==========================================================
+  backend:
+    # "build: context: ./backend" = pakai Dockerfile yang ada di folder backend/
+    build:
+      context: ./backend
+
+    container_name: sos-backend
+    restart: unless-stopped
+
+    # Perintah yang dijalankan saat container start.
+    # `npm run dev` = `tsx watch src/index.ts` (auto-restart saat file berubah).
+    command: npm run dev
+
+    # Port 5000 diakses dari komputer kamu -> terus ke container.
+    # Browser tetap buka http://localhost:5000 seperti biasa.
+    ports:
+      - "5000:5000"
+
+    # Environment variable yang menimpa isi file backend/.env saat runtime.
+    #   - MONGO_URI: "mongo" di sini adalah NAMA SERVICE dari compose.
+    #     Di jaringan internal Docker, "mongo" sudah menunjuk ke container
+    #     Mongo, jadi tidak perlu hardcode IP seperti 127.0.0.1.
+    #   - CLIENT_URL: asal request frontend (untuk CORS + Socket.IO)
+    #     sesuai port Vite di container.
+    #   - TZ: zona waktu server disamakan dengan Indonesia.
+    # JWT_SECRET, SIGNED_URL_SECRET, dll TIDAK ditulis di sini —
+    # nilai yang ada di backend/.env tetap terbaca karena file .env
+    # ikut bind mount (bukan dibekukan ke image).
+    environment:
+      MONGO_URI: mongodb://mongo:27017/emergency_sos
+      CLIENT_URL: http://localhost:5173
+      TZ: Asia/Jakarta
+
+    # DUA mount di bawah:
+    #  1) ./backend:/app  -> BIND MOUNT. Folder backend di komputer kamu
+    #                        DIKUNCI ke folder /app di container.
+    #                        Kamu edit file -> container langsung melihat → hot-reload.
+    #  2) backend_node_modules:/app/node_modules -> NAMED VOLUME.
+    #                        Bind mount tadi "menutupi" seluruh /app dengan
+    #                        folder kamu (yang TIDAK punya node_modules).
+    #                        Supaya dependency Linux hasil `npm ci` tidak hilang,
+    #                        node_modules disimpan di volume sendiri.
+    #                        (Trik: node_modules Windows TIDAK akan mengganggu.)
+    volumes:
+      - ./backend:/app
+      - backend_node_modules:/app/node_modules
+
+    # Backend baru start SETELAH mongo sehat (lihat healthcheck di atas).
+    # Memakai bentuk panjang agar bisa memakai "condition: service_healthy".
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  # ==========================================================
+  # LAYANAN 3: Frontend (Vite dev server)
+  # ==========================================================
+  frontend:
+    build:
+      context: ./frontend
+
+    container_name: sos-frontend
+    restart: unless-stopped
+
+    # `npm run dev` = vite (dev server dengan HMR)
+    command: npm run dev
+
+    ports:
+      - "5173:5173"
+
+    # Bind mount source + named volume node_modules (sama seperti backend).
+    # Frontend tidak butuh environment khusus karena VITE_API_ORIGIN &
+    # VITE_API_URL sudah dibaca dari file frontend/.env yang ikut ter-mount
+    # (nilainya tetap http://localhost:5000 — CORS sudah dihandle CLIENT_URL).
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+
+    # Frontend cukup start setelah backend (tidak perlu menunggu healthy).
+    depends_on:
+      - backend
+
+# ============================================================
+# Deklarasi VOLUME (tempat penyimpanan data Docker)
+# ============================================================
+# Volume yang dideklarasikan di sini dibuat otomatis oleh Docker.
+# Yang berisi data penting (mongo-data) TIDAK hilang saat `compose down`,
+# baru hilang kalau pakai `docker compose down -v`.
+volumes:
+  mongo-data:
+  backend_node_modules:
+  frontend_node_modules:

@@ -1,96 +1,95 @@
 # Emergency SOS Network
 
-Platform respons darurat komunitas berbasis real-time yang memungkinkan warga mengirim sinyal SOS dengan lokasi GPS, dan relawan terdekat dapat merespons secara langsung.
+Emergency SOS Network adalah platform respons darurat komunitas berbasis web. Warga dapat mengirim sinyal SOS beserta lokasi GPS dan foto kejadian, sementara relawan serta admin menerima pembaruan real-time untuk memantau, mengklaim, dan menyelesaikan laporan.
 
 ## Fitur Utama
 
 ### Warga
-- Tombol SOS satu kali dengan deteksi lokasi GPS otomatis
-- Lampiran foto insiden (maks 5MB)
-- Pelacakan status real-time (menunggu -> ditangani -> selesai)
-- Pembatalan sinyal SOS
+- Kirim SOS dengan lokasi GPS otomatis.
+- Tambahkan deskripsi dan foto insiden sampai 5 MB.
+- Lihat riwayat laporan pribadi.
+- Batalkan SOS selama status masih `pending`.
+- Kelola profil, foto profil, dan kata sandi.
 
 ### Relawan
-- Pemberitahuan masuk (popup modal) saat ada SOS baru
-- Peta interaktif dengan marker SOS dan posisi relawan
-- Navigasi rute mengemudi dari lokasi relawan ke lokasi insiden (OSRM)
-- Toggle mode siaga (online/offline)
-- Pengaturan radius respons (500m - 50km)
-- Riwayat bantuan
+- Terima notifikasi SOS baru secara real-time melalui Socket.IO.
+- Pantau semua laporan pada peta interaktif.
+- Klaim laporan, batalkan klaim, dan tandai selesai.
+- Lihat rute menuju lokasi kejadian menggunakan OSRM.
+- Atur lokasi, radius respons, dan status siaga online/offline.
+- Lihat riwayat bantuan.
 
 ### Admin
-- Dasbor komando langsung dengan peta dan feed insiden real-time
-- Manajemen pengguna (CRUD) dengan pencarian dan filter
-- Riwayat laporan lengkap dengan badge status
-- Statistik relawan (peringkat, ringkasan, grafik tren 7 hari)
-- Penolakan sinyal SOS
+- Pantau seluruh laporan dari dashboard komando.
+- Kelola pengguna: buat, ubah, hapus, dan aktif/nonaktifkan relawan.
+- Lihat riwayat laporan dan statistik relawan.
+- Lihat ranking relawan, ringkasan 30 hari, dan tren laporan 7 hari.
 
 ## Stack Teknologi
 
 ### Backend
-| Teknologi | Versi | Kegunaan |
-|-----------|-------|----------|
-| Express | ^5.2.1 | Framework HTTP |
-| TypeScript | ^7.0.2 | Type safety |
-| Mongoose | ^9.9.2 | MongoDB ODM |
-| Socket.IO | ^4.8.3 | WebSocket real-time |
-| JSON Web Token | ^9.0.3 | Autentikasi |
-| bcryptjs | ^3.0.3 | Hashing password |
-| Joi | ^18.2.3 | Validasi request |
-| Multer | ^2.2.0 | Upload file |
-| Helmet | ^8.3.0 | Header keamanan |
+| Teknologi | Kegunaan |
+|-----------|----------|
+| Express 5 | HTTP API |
+| TypeScript | Type safety |
+| MongoDB + Mongoose | Database dan ODM |
+| Socket.IO | Komunikasi real-time |
+| JWT + HttpOnly cookie | Autentikasi |
+| bcryptjs | Hash password |
+| Joi | Validasi request |
+| Multer + file-type | Upload dan validasi gambar |
+| Helmet, CORS, express-rate-limit | Keamanan API |
 
 ### Frontend
-| Teknologi | Versi | Kegunaan |
-|-----------|-------|----------|
-| React | ^19.2.8 | UI library |
-| Vite | ^8.2.0 | Build tool |
-| Tailwind CSS | ^4.3.3 | Styling |
-| Redux Toolkit | ^2.12.0 | State management |
-| RTK Query | (bundled) | Data fetching |
-| React Router DOM | ^7.18.2 | Routing |
-| Leaflet / React-Leaflet | ^1.9.4 / ^5.0.0 | Peta interaktif |
-| Socket.IO Client | ^4.8.3 | WebSocket |
-| Recharts | ^3.10.1 | Visualisasi data |
-| SweetAlert2 | ^11.26.25 | Dialog alert |
-
-### Database
-- **MongoDB** via Mongoose (database: `emergency_sos`)
+| Teknologi | Kegunaan |
+|-----------|----------|
+| React 19 + Vite | UI dan dev server |
+| Tailwind CSS 4 | Styling |
+| Redux Toolkit + RTK Query | State dan data fetching |
+| React Router DOM | Routing |
+| Leaflet + React-Leaflet | Peta interaktif |
+| Socket.IO Client | Listener real-time |
+| Recharts | Grafik statistik |
+| SweetAlert2 | Dialog dan alert |
+| lucide-react | Ikon UI |
 
 ## Struktur Proyek
 
-```
+```text
 Emergency SOS Network/
 ├── backend/
 │   ├── src/
-│   │   ├── api/            # Route handlers
-│   │   ├── config/         # Database connection
-│   │   ├── controller/     # Controller layer
+│   │   ├── api/            # Definisi route Express
+│   │   ├── config/         # Koneksi database
+│   │   ├── controller/     # HTTP controller
+│   │   ├── error/          # Custom AppError
+│   │   ├── interface/      # Interface TypeScript
+│   │   ├── middleware/     # Auth, role, rate limit, error handler
+│   │   ├── model/          # Schema Mongoose
 │   │   ├── services/       # Business logic
-│   │   ├── model/          # Mongoose schemas
-│   │   ├── interface/      # TypeScript interfaces
-│   │   ├── middleware/     # Auth & error middleware
-│   │   ├── validation/     # Joi validation schemas
-│   │   ├── error/          # Custom error classes
-│   │   ├── utils/          # JWT, upload, date utilities
-│   │   └── types/          # Type declarations
-│   ├── uploads/            # Uploaded files
-│   ├── dist/               # Compiled output
-│   ├── .env                # Environment variables
+│   │   ├── types/          # Deklarasi tipe Express
+│   │   ├── utils/          # JWT, upload, signed URL, date helper
+│   │   ├── validation/     # Schema Joi
+│   │   ├── app.ts          # Express app
+│   │   └── index.ts        # HTTP + Socket.IO server
+│   ├── private_uploads/    # File gambar privat, disajikan via signed URL
+│   ├── Dockerfile
 │   └── package.json
 │
 ├── frontend/
 │   ├── src/
-│   │   ├── config/         # API configuration
-│   │   ├── redux/          # Store, slices, RTK Query APIs
+│   │   ├── components/     # Komponen reusable
+│   │   ├── config/         # Konfigurasi API
+│   │   ├── layouts/        # Layout admin dan relawan
+│   │   ├── pages/          # Halaman aplikasi
+│   │   ├── redux/          # Store, slice, RTK Query API
 │   │   ├── services/       # Socket.IO client
-│   │   ├── utils/          # Alert dialogs
-│   │   ├── layouts/        # Admin & Volunteer shell layouts
-│   │   ├── pages/          # All page components
-│   │   └── components/     # Reusable UI components
-│   ├── .env                # Vite environment variables
+│   │   └── utils/          # Helper alert
+│   ├── .env.example
+│   ├── Dockerfile
 │   └── package.json
 │
+├── docker-compose.yml
 └── README.md
 ```
 
@@ -98,177 +97,267 @@ Emergency SOS Network/
 
 | Role | Keterangan | Kemampuan |
 |------|------------|-----------|
-| **user** (Warga) | Pengguna umum | Kirim SOS, lihat riwayat, edit profil, batalkan SOS |
-| **volunteer** (Relawan) | Relawan lapangan | Semua hak user + lihat semua SOS, klaim/selesaikan SOS, toggle status, atur radius/lokasi |
-| **admin** | Pengelola sistem | Semua hak relawan + dasbor langsung, kelola pengguna, tolak SOS, lihat statistik |
+| `user` | Warga/pengguna umum | Kirim SOS, lihat riwayat sendiri, batal SOS `pending`, kelola profil |
+| `volunteer` | Relawan lapangan | Semua akses user, lihat semua SOS, klaim/selesaikan laporan, atur radius dan status aktif |
+| `admin` | Pengelola sistem | Dashboard, kelola pengguna, lihat semua laporan, statistik relawan, hapus laporan |
 
 ## Alur Status SOS
 
+```text
+pending -> in_progress -> resolved
+              |
+              -> pending
 ```
-pending ──────────> in_progress ──────────> resolved (terkunci)
-   │                    │
-   │                    └──────────────> pending (batal klaim)
-   └──────────────────> rejected (admin only, terkunci)
-```
 
-## Endpoint API
+Keterangan:
+- `pending`: laporan baru dan belum diklaim.
+- `in_progress`: laporan sedang ditangani relawan.
+- `resolved`: laporan selesai dan terkunci.
+- `rejected`: tersedia di skema dan tampilan riwayat, tetapi transisi aktif di service saat ini berfokus pada `pending`, `in_progress`, dan `resolved`.
 
-### Autentikasi
-| Method | Endpoint | Deskripsi |
-|--------|----------|-----------|
-| POST | `/api/auth/register` | Registrasi pengguna baru |
-| POST | `/api/auth/login` | Login, mengembalikan JWT |
+## Autentikasi dan Real-Time
 
-### Pengguna (Membutuhkan autentikasi)
-| Method | Endpoint | Deskripsi |
-|--------|----------|-----------|
-| GET | `/api/user/profile` | Ambil profil sendiri |
-| PATCH | `/api/user/profile` | Update nama |
-| PATCH | `/api/user/photo` | Upload foto profil |
-| PATCH | `/api/user/password` | Ganti password |
-| GET | `/api/user/volunteers` | Ambil semua relawan aktif |
-| PATCH | `/api/user/location` | Update koordinat GPS + radius |
-| GET | `/api/user/all` | Ambil semua pengguna (admin) |
-| PATCH | `/api/user/status` | Toggle status aktif relawan |
-| DELETE | `/api/user/:id` | Hapus pengguna (admin) |
-| POST | `/api/user` | Buat pengguna baru (admin) |
-| PATCH | `/api/user/:id` | Update data pengguna (admin) |
-
-### SOS (Membutuhkan autentikasi)
-| Method | Endpoint | Deskripsi |
-|--------|----------|-----------|
-| POST | `/api/sos` | Buat sinyal SOS baru |
-| GET | `/api/sos` | Ambil semua sinyal SOS |
-| GET | `/api/sos/user` | Ambil riwayat SOS sendiri |
-| GET | `/api/sos/statistics` | Statistik & grafik tren (admin) |
-| GET | `/api/sos/:id` | Ambil detail SOS |
-| PATCH | `/api/sos/:id/status` | Update status SOS |
-| PATCH | `/api/sos/:id/data` | Update data SOS |
-| DELETE | `/api/sos/:id` | Hapus/batalkan SOS |
-
-## Socket.IO Events
+- Login dan register menyimpan token JWT ke HttpOnly cookie bernama `token`.
+- API juga mendukung fallback `Authorization: Bearer <token>`.
+- Logout menaikkan `tokenVersion`, sehingga token lama otomatis tidak valid.
+- Socket.IO tidak membaca cookie langsung dari JavaScript. Frontend mengambil token handshake dari `GET /api/auth/token`, lalu menggunakannya saat koneksi socket.
+- Event real-time yang dipakai:
 
 | Event | Arah | Deskripsi |
 |-------|------|-----------|
-| `sos:new` | Server -> Client | Sinyal SOS baru dibuat |
+| `sos:new` | Server -> Client | SOS baru dibuat |
 | `sos:update` | Server -> Client | Status SOS berubah |
-| `sos:delete` | Server -> Client | SOS dihapus/dibatalkan |
+| `sos:delete` | Server -> Client | SOS dihapus atau dibatalkan |
 
-## Halaman & Rute
+## Endpoint API
 
-| Path | Komponen | Akses | Deskripsi |
-|------|----------|-------|-----------|
-| `/` | Home | Publik | Peta penuh dengan tombol SOS |
-| `/login` | Login | Publik | Form login |
-| `/register` | Register | Publik | Form registrasi |
-| `/profil` | Profile | Semua user | Pengaturan profil |
-| `/volunteer` | Volunteer | Relawan | Peta interaktif + navigasi rute |
-| `/volunteer/riwayat` | Riwayat Bantuan | Relawan | Riwayat bantuan relawan |
-| `/volunteer/pengaturan-radius` | Pengaturan Radius | Relawan | Pengaturan GPS & radius |
-| `/admin` | Admin Dashboard | Admin | Dasbor komando langsung |
-| `/admin/pengguna` | Kelola Pengguna | Admin | Manajemen pengguna |
-| `/admin/riwayat-laporan` | Riwayat Laporan | Admin | Semua laporan SOS |
-| `/admin/statistik-relawan` | Statistik Relawan | Admin | Grafik & peringkat relawan |
+Base URL default: `http://localhost:5000/api`
 
-## Instalasi & Menjalankan
+### Auth
+| Method | Endpoint | Akses | Deskripsi |
+|--------|----------|-------|-----------|
+| POST | `/auth/register` | Publik | Registrasi user baru |
+| POST | `/auth/login` | Publik | Login dan set HttpOnly cookie |
+| POST | `/auth/logout` | Login | Logout dan invalidasi token lama |
+| GET | `/auth/token` | Login | Ambil token sementara untuk Socket.IO |
 
-### Prasyarat
-- [Node.js](https://nodejs.org/) v18+
-- [MongoDB](https://www.mongodb.com/) (lokal atau Atlas)
-- [npm](https://www.npmjs.com/)
+### User
+| Method | Endpoint | Akses | Deskripsi |
+|--------|----------|-------|-----------|
+| GET | `/user/profile` | Login | Ambil profil sendiri |
+| PATCH | `/user/profile` | Login | Update nama profil |
+| PATCH | `/user/photo` | Login | Upload foto profil |
+| PATCH | `/user/password` | Login | Ganti kata sandi |
+| GET | `/user/volunteers` | Login | Ambil relawan aktif yang punya lokasi |
+| PATCH | `/user/location` | Login | Update koordinat, nama lokasi, dan radius |
+| PATCH | `/user/status` | Volunteer | Toggle status aktif relawan sendiri |
+| GET | `/user/all` | Admin | Ambil semua pengguna |
+| PATCH | `/user/:id/status` | Admin | Aktif/nonaktifkan relawan tertentu |
+| POST | `/user` | Admin | Buat pengguna baru |
+| PATCH | `/user/:id` | Admin | Update data pengguna |
+| DELETE | `/user/:id` | Admin | Hapus pengguna non-admin |
+
+### SOS
+| Method | Endpoint | Akses | Deskripsi |
+|--------|----------|-------|-----------|
+| POST | `/sos` | Login | Kirim SOS baru, mendukung `multipart/form-data` field `image` |
+| GET | `/sos/user` | Login | Ambil riwayat SOS milik user login |
+| GET | `/sos` | Admin, volunteer | Ambil semua SOS |
+| GET | `/sos/statistics` | Admin | Ambil ranking, ringkasan, dan tren statistik |
+| GET | `/sos/:id` | Owner, admin, volunteer | Ambil detail SOS |
+| PATCH | `/sos/:id/status` | Admin, volunteer | Ubah status SOS |
+| PATCH | `/sos/:id/data` | Admin | Koreksi lokasi, deskripsi, atau data SOS |
+| DELETE | `/sos/:id` | Owner, admin | Batalkan SOS `pending` milik sendiri atau hapus sebagai admin |
+
+## Halaman Frontend
+
+| Path | Akses | Deskripsi |
+|------|-------|-----------|
+| `/` | Publik | Home dengan peta dan tombol SOS |
+| `/login` | Publik | Login |
+| `/register` | Publik | Registrasi |
+| `/profil` | Login | Profil user umum |
+| `/volunteer` | Volunteer | Dashboard peta relawan |
+| `/volunteer/riwayat` | Volunteer | Riwayat bantuan |
+| `/volunteer/pengaturan-radius` | Volunteer | Pengaturan lokasi dan radius |
+| `/volunteer/profil` | Volunteer | Profil relawan |
+| `/admin` | Admin | Dashboard admin |
+| `/admin/pengguna` | Admin | Kelola pengguna |
+| `/admin/riwayat-laporan` | Admin | Riwayat semua laporan |
+| `/admin/statistik-relawan` | Admin | Statistik dan ranking relawan |
+| `/admin/profil` | Admin | Profil admin |
+
+## Menjalankan dengan Docker
+
+Prasyarat:
+- Docker Desktop
+- File environment backend dan frontend sudah dibuat
+
+1. Buat `backend/.env`:
+
+```env
+JWT_SECRET=isi_minimal_32_karakter_untuk_jwt
+JWT_EXPIRES_IN=7d
+SIGNED_URL_SECRET=isi_minimal_32_karakter_untuk_signed_url
+NODE_ENV=development
+```
+
+`docker-compose.yml` sudah mengatur `MONGO_URI`, `CLIENT_URL`, dan `TZ` untuk container backend.
+
+2. Buat `frontend/.env` dari contoh:
+
+```powershell
+Copy-Item frontend\.env.example frontend\.env
+```
+
+3. Jalankan semua service:
+
+```bash
+docker compose up --build
+```
+
+Service default:
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:5000`
+- MongoDB: `mongodb://localhost:27017`
+
+Perintah Docker yang sering dipakai:
+
+```bash
+docker compose up -d
+docker compose logs backend
+docker compose down
+docker compose down -v
+```
+
+Catatan: `docker compose down -v` menghapus volume MongoDB, sehingga data database ikut hilang.
+
+## Menjalankan Secara Lokal
+
+Prasyarat:
+- Node.js 18+
+- npm
+- MongoDB lokal atau MongoDB Atlas
 
 ### Backend
 
 ```bash
 cd backend
-
-# Install dependencies
 npm install
-
-# Buat file .env (lihat bawah)
-cp .env.example .env
-
-# Jalankan development server
 npm run dev
 ```
 
-### Frontend
+Buat `backend/.env` sebelum menjalankan server:
 
-```bash
-cd frontend
-
-# Install dependencies
-npm install
-
-# Buat file .env (lihat bawah)
-cp .env.example .env
-
-# Jalankan development server
-npm run dev
-```
-
-### Environment Variables
-
-#### Backend (`.env`)
 ```env
-MONGODB_URI=mongodb://127.0.0.1:27017/emergency_sos
+MONGO_URI=mongodb://127.0.0.1:27017/emergency_sos
+CLIENT_URL=http://localhost:5173
 PORT=5000
-JWT_SECRET=your_secret_key_here
-JWT_EXPIRES_IN=1d
+JWT_SECRET=isi_minimal_32_karakter_untuk_jwt
+JWT_EXPIRES_IN=7d
+SIGNED_URL_SECRET=isi_minimal_32_karakter_untuk_signed_url
 NODE_ENV=development
 TZ=Asia/Jakarta
 ```
 
-#### Frontend (`.env`)
+`CLIENT_URL` dapat berisi beberapa origin, dipisahkan koma, misalnya:
+
+```env
+CLIENT_URL=http://localhost:5173,https://contoh-domain.com
+```
+
+### Frontend
+
+```powershell
+cd frontend
+npm install
+Copy-Item .env.example .env
+npm run dev
+```
+
+Isi `frontend/.env`:
+
 ```env
 VITE_API_ORIGIN=http://localhost:5000
 VITE_API_URL=http://localhost:5000/api
 ```
 
-### Build untuk Produksi
+## Build Produksi
+
+Backend:
 
 ```bash
-# Backend
 cd backend
 npm run build
 npm start
+```
 
-# Frontend
+Frontend:
+
+```bash
 cd frontend
 npm run build
 npm run preview
 ```
 
+Untuk production, pastikan:
+- `NODE_ENV=production`.
+- `JWT_SECRET` dan `SIGNED_URL_SECRET` kuat dan stabil.
+- `CLIENT_URL` berisi origin frontend production.
+- Cookie `secure` membutuhkan HTTPS.
+
+## Upload dan Penyajian Gambar
+
+- File disimpan di `backend/private_uploads/`.
+- URL yang disimpan di database berbentuk `/uploads/<filename>`.
+- Backend hanya menyajikan gambar lewat signed URL: `/uploads/<filename>?e=<expires>&sig=<signature>`.
+- Signed URL berlaku 24 jam.
+- `SIGNED_URL_SECRET` wajib stabil. Jika berubah, link gambar lama tidak bisa diverifikasi.
+- Upload SOS menerima JPG, PNG, WEBP, dan GIF sampai 5 MB, serta dicek dari isi file.
+- Upload foto profil menerima JPG, PNG, dan WEBP sampai 2 MB.
+
 ## Skema Database
 
-### users
+### `users`
 | Field | Tipe | Keterangan |
 |-------|------|------------|
 | `nama` | String | Nama lengkap |
-| `email` | String | Email unik |
-| `password` | String | Password (bcrypt) |
-| `role` | String | `user` / `volunteer` / `admin` |
-| `latitude` | Number | Lokasi GPS (relawan) |
-| `longitude` | Number | Lokasi GPS (relawan) |
+| `email` | String | Email unik, lowercase |
+| `password` | String | Hash password bcrypt |
+| `role` | String | `user`, `volunteer`, atau `admin` |
+| `latitude` | Number | Latitude lokasi user/relawan |
+| `longitude` | Number | Longitude lokasi user/relawan |
 | `locationName` | String | Nama lokasi |
-| `radius` | Number | Radius respons (meter, default 5000) |
-| `isVolunteerActive` | Boolean | Status aktif relawan |
+| `tokenVersion` | Number | Versi token untuk invalidasi sesi |
+| `radius` | Number | Radius respons dalam meter, default 5000 |
+| `isVolunteerActive` | Boolean | Status siaga relawan |
 | `photo` | String | Path foto profil |
+| `createdAt` / `updatedAt` | Date | Timestamp otomatis |
 
-### sos
+### `sos`
 | Field | Tipe | Keterangan |
 |-------|------|------------|
 | `userId` | ObjectId | Pengirim SOS |
-| `latitude` | Number | Lokasi insiden |
-| `longitude` | Number | Lokasi insiden |
-| `description` | String | Deskripsi (opsional, max 500) |
-| `image` | String | Path foto insiden |
-| `status` | String | `pending` / `in_progress` / `resolved` / `rejected` |
-| `volunteerId` | ObjectId | Relawan yang menangani |
+| `latitude` | Number | Latitude lokasi kejadian |
+| `longitude` | Number | Longitude lokasi kejadian |
+| `description` | String | Deskripsi kejadian |
+| `image` | String/null | Path foto insiden |
+| `status` | String | `pending`, `in_progress`, `resolved`, atau `rejected` |
+| `volunteerId` | ObjectId/null | Relawan yang menangani |
+| `createdAt` / `updatedAt` | Date | Timestamp otomatis, diformat WIB saat JSON response |
+
+## Rate Limit
+
+Rate limit aktif saat `NODE_ENV=production`:
+- Auth: 20 request per 15 menit per IP.
+- SOS: 5 request per 15 menit per IP.
+- API umum: 100 request per 15 menit per IP jika middleware umum dipasang.
+
+Saat development, limiter dilewati agar pengujian tidak terganggu.
 
 ## Lokasi Default
 
-Aplikasi menggunakan koordinat **Padang, Sumatera Barat, Indonesia** (`-0.947, 100.354`) sebagai fallback lokasi default.
+Frontend menggunakan koordinat Padang, Sumatera Barat, Indonesia (`-0.947`, `100.354`) sebagai fallback lokasi peta.
 
 ## Lisensi
 
