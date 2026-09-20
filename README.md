@@ -235,7 +235,7 @@ Catatan: `docker compose down -v` menghapus volume MongoDB, sehingga data databa
 ## Menjalankan Secara Lokal
 
 Prasyarat:
-- Node.js 18+
+- Node.js 22 direkomendasikan, atau minimal Node.js 20.19+
 - npm
 - MongoDB lokal atau MongoDB Atlas
 
@@ -351,13 +351,9 @@ Untuk production, pastikan:
 Rate limit aktif saat `NODE_ENV=production`:
 - Auth: 20 request per 15 menit per IP.
 - SOS: 5 request per 15 menit per IP.
-- API umum: 100 request per 15 menit per IP jika middleware umum dipasang.
+- API umum: 100 request per 15 menit per IP.
 
 Saat development, limiter dilewati agar pengujian tidak terganggu.
-
-## Lokasi Default
-
-Frontend menggunakan koordinat Padang, Sumatera Barat, Indonesia (`-0.947`, `100.354`) sebagai fallback lokasi peta.
 
 ## Lisensi
 
